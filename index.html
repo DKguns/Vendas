@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caixa de Ferramentas do Vendedor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+            background-color: #f8fafc; /* Fundo mais suave */
+        }
+        .tab-button {
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .tab-button.active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .result-box {
+            background-color: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0.25rem;
+        }
+        /* Estilos do Funil Kanban Moderno */
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr); /* 6 colunas */
+            gap: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            min-height: 450px;
+        }
+        .kanban-column {
+            min-width: 280px;
+            background-color: #f1f5f9;
+            border-radius: 0.75rem; /* Mais arredondado */
+            padding: 1rem;
+            transition: background-color 0.2s;
+        }
+        .kanban-column-header {
+            padding: 0 0.25rem 1rem 0.25rem;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 1rem;
+        }
+        .kanban-column-header h3 {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .column-indicators {
+            font-size: 0.875rem;
+            color: #475569;
+        }
+        .kanban-cards {
+            min-height: 250px;
+            padding-bottom: 1rem;
+            transition: background-color 0.2s;
+        }
+        .kanban-card {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.07), 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            margin-bottom: 1rem;
+            cursor: grab;
+            border: 1px solid #e2e8f0;
+        }
+        .kanban-card:active { cursor: grabbing; }
+        .kanban-card.dragging { opacity: 0.5; transform: rotate(2deg); }
+        .drag-over { background-color: #e0e7ff !important; }
+
+        .card-title { font-weight: 500; display: block; margin-bottom: 0.75rem; }
+        .card-value { display: flex; align-items: center; gap: 0.25rem; }
+        .card-value-input {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            -moz-appearance: textfield;
+        }
+        .card-value-input::-webkit-outer-spin-button,
+        .card-value-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .indicator-card {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.07);
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* Estilos para Tooltip */
+        .tooltip-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+        .tooltip-icon {
+            cursor: pointer;
+            color: #94a3b8;
+            margin-left: 6px;
+        }
+        .tooltip-text {
+            visibility: hidden;
+            width: 250px;
+            background-color: #1e293b;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -125px; /* Metade da largura */
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent;
+        }
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-screen-2xl">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Caixa de Ferramentas do Vendedor</h1>
+            <p class="text-lg text-gray-600 mt-2">Suas ferramentas essenciais para vender mais e melhor.</p>
+        </header>
+
+        <div class="mb-8 border-b border-gray-200">
+            <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
+                <button onclick="changeTab(event, 'lucratividade')" class="tab-button active text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-calculator"></i>Calculadoras</button>
+                <button onclick="changeTab(event, 'script')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-scroll"></i>Gerador de Script</button>
+                <button onclick="changeTab(event, 'funil')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-funnel"></i>Funil de Vendas</button>
+                <button onclick="changeTab(event, 'concorrencia')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-users-three"></i>Concorrência</button>
+                <button onclick="changeTab(event, 'estrategias')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-strategy"></i>Estratégias</button>
+            </nav>
+        </div>
+
+        <main>
+            <!-- Calculadoras -->
+            <div id="lucratividade" class="tab-content active">
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    <!-- Nova Calculadora Financeira -->
+                    <div class="bg-white p-6 md:p-8 rounded-lg shadow-md lg:col-span-3">
+                        <h2 class="text-2xl font-bold mb-1">Análise Financeira da Venda</h2>
+                        <p class="text-gray-600 mb-6">Uma ferramenta completa para analisar e precificar suas vendas com precisão.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                            <!-- Coluna 1: Custos -->
+                            <div class="space-y-4">
+                                <h3 class="font-semibold text-lg border-b pb-2">1. Custos Diretos</h3>
+                                <div><label for="custoProduto" class="block text-sm font-medium text-gray-700 tooltip-container">Custo do Produto (R$) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Valor pago ao fornecedor pela mercadoria que está sendo vendida.</span></label><input type="number" id="custoProduto" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="100.00"></div>
+                                <div><label for="frete" class="block text-sm font-medium text-gray-700 tooltip-container">Frete (R$) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Custo de transporte para entregar o produto ao cliente, caso seja pago pela sua empresa.</span></label><input type="number" id="frete" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="25.00"></div>
+                            </div>
+
+                             <!-- Coluna 2: Despesas -->
+                            <div class="space-y-4">
+                                <h3 class="font-semibold text-lg border-b pb-2">2. Despesas Variáveis</h3>
+                                <div><label for="impostos" class="block text-sm font-medium text-gray-700 tooltip-container">Impostos (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual total de impostos que incidem sobre o preço da venda (Ex: ICMS, PIS, COFINS).</span></label><input type="number" id="impostos" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="10"></div>
+                                <div><label for="taxaPagamento" class="block text-sm font-medium text-gray-700 tooltip-container">Taxa de Pagamento (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual da taxa da maquininha de cartão, gateway de pagamento ou boleto.</span></label><input type="number" id="taxaPagamento" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="4.5"></div>
+                                <div><label for="comissao" class="block text-sm font-medium text-gray-700 tooltip-container">Comissão (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual de comissão a ser pago ao vendedor sobre o preço da venda.</span></label><input type="number" id="comissao" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="5"></div>
+                                <div><label for="custoFixo" class="block text-sm font-medium text-gray-700 tooltip-container">Rateio Custo Fixo (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Opcional. Um percentual do preço da venda para ajudar a cobrir custos fixos da empresa (aluguel, salários, etc.).</span></label><input type="number" id="custoFixo" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="3"></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-6 border-t">
+                             <h3 class="font-semibold text-lg pb-2">3. Preço e Lucro</h3>
+                             <p class="text-sm text-gray-500 mb-4">Preencha <span class="font-bold">um</span> dos campos abaixo e clique no botão correspondente.</p>
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                <div>
+                                    <label for="precoVenda" class="block text-sm font-medium text-gray-700">Preço de Venda Final (R$)</label>
+                                    <input type="number" id="precoVenda" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="250.00">
+                                    <button onclick="analiseFinanceira('analisar')" class="mt-2 w-full bg-emerald-600 text-white font-bold py-2 px-4 rounded-md hover:bg-emerald-700 transition">Analisar Venda</button>
+                                </div>
+                                <div>
+                                    <label for="margemLucro" class="block text-sm font-medium text-gray-700">Margem de Lucro Desejada (%)</label>
+                                    <input type="number" id="margemLucro" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="20">
+                                    <button onclick="analiseFinanceira('precificar')" class="mt-2 w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition">Calcular Preço</button>
+                                </div>
+                             </div>
+                        </div>
+                         <!-- Seção de Exemplo -->
+                        <div class="mt-6">
+                            <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group">
+                                <summary class="font-semibold text-gray-800 group-open:text-blue-700">Ver Exemplo de Cálculo</summary>
+                                <div class="mt-3 pt-3 border-t text-sm text-gray-700 space-y-2">
+                                    <p><strong>Cenário:</strong> Um produto custou <strong>R$ 80,00</strong> para a empresa. O frete para o cliente é de <strong>R$ 15,00</strong>. Os impostos somam <strong>12%</strong>, a taxa do cartão é <strong>4%</strong> e a comissão do vendedor é de <strong>5%</strong>. A empresa quer uma margem de lucro de <strong>25%</strong>.</p>
+                                    <p>Qual deve ser o preço de venda?</p>
+                                    <button onclick="preencherExemplo()" class="mt-2 bg-gray-200 text-gray-800 font-bold py-1 px-3 rounded-md hover:bg-gray-300 transition text-xs">Preencher com Exemplo</button>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+                     <!-- Coluna de Resultados -->
+                    <div class="bg-white p-6 md:p-8 rounded-lg shadow-md lg:col-span-2">
+                        <h2 class="text-2xl font-bold mb-1">Resultados da Análise</h2>
+                        <div id="resultadoAnalise" class="result-box mt-6">
+                            <p class="text-gray-500 text-center py-10">Preencha os campos e calcule para ver os resultados.</p>
+                        </div>
+                        <!-- Simulador de Negociação -->
+                        <div id="simuladorNegociacao" class="mt-6 hidden">
+                             <h2 class="text-2xl font-bold mb-1 border-t pt-6">Simulador de Negociação</h2>
+                             <p class="text-gray-600 mb-6">Teste cenários para tomar as melhores decisões.</p>
+
+                             <div class="space-y-6">
+                                <!-- Simular Desconto -->
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h3 class="font-semibold text-lg">1. Qual o impacto de um desconto?</h3>
+                                    <div class="flex items-end gap-2 mt-2">
+                                        <div class="flex-grow">
+                                            <label for="simularDescontoInput" class="text-sm font-medium">Desconto (%)</label>
+                                            <input type="number" id="simularDescontoInput" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="10">
+                                        </div>
+                                        <button onclick="simularDesconto()" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 transition h-11">Simular</button>
+                                    </div>
+                                    <div id="resultadoSimularDesconto" class="mt-3"></div>
+                                </div>
+
+                                <!-- Calcular Desconto Máximo -->
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h3 class="font-semibold text-lg">2. Qual o desconto máximo que posso dar?</h3>
+                                    <div class="flex items-end gap-2 mt-2">
+                                        <div class="flex-grow">
+                                            <label for="descontoMaximoInput" class="text-sm font-medium">Mantendo a margem mínima de (%)</label>
+                                            <input type="number" id="descontoMaximoInput" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="15">
+                                        </div>
+                                        <button onclick="calcularDescontoMaximo()" class="bg-rose-600 text-white font-bold py-2 px-4 rounded-md hover:bg-rose-700 transition h-11">Calcular</button>
+                                    </div>
+                                    <div id="resultadoDescontoMaximo" class="mt-3"></div>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gerador de Script -->
+            <div id="script" class="tab-content">
+                <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-1">Gerador de Script de Vendas</h2>
+                    <p class="text-gray-600 mb-6">Preencha os campos para criar um roteiro de abordagem inicial.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div><label for="scriptNomeCliente" class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente</label><input type="text" id="scriptNomeCliente" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: João Silva"></div>
+                        <div><label for="scriptNomeEmpresa" class="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa do Cliente</label><input type="text" id="scriptNomeEmpresa" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Silva & Filhos Ltda"></div>
+                        <div><label for="scriptProduto" class="block text-sm font-medium text-gray-700 mb-1">Seu Produto/Serviço</label><input type="text" id="scriptProduto" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Software de Gestão"></div>
+                        <div><label for="scriptDor" class="block text-sm font-medium text-gray-700 mb-1">Principal Dor que resolve</label><input type="text" id="scriptDor" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Otimizar o controle de estoque"></div>
+                    </div>
+                    <div class="mt-6"><button onclick="gerarScript()" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition">Gerar Script</button></div>
+                    <div id="resultadoScript" class="result-box mt-6 hidden whitespace-pre-wrap"></div>
+                </div>
+            </div>
+            
+            <!-- Funil de Vendas -->
+            <div id="funil" class="tab-content">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                    <h2 class="text-3xl font-bold mb-2">Funil de Vendas Pessoal</h2>
+                    <p class="text-gray-600 mb-6">Arraste os negócios entre as fases. Os dados não são salvos ao fechar a página.</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                        <div class="indicator-card flex items-start gap-4 p-5">
+                            <div class="bg-blue-100 text-blue-600 p-3 rounded-lg"><i class="ph-bold ph-chart-line-up text-2xl"></i></div>
+                            <div><p class="text-sm text-gray-500">Valor em Aberto</p><p id="active-value" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
+                        </div>
+                        <div class="indicator-card flex items-start gap-4 p-5">
+                            <div class="bg-indigo-100 text-indigo-600 p-3 rounded-lg"><i class="ph-bold ph-scales text-2xl"></i></div>
+                            <div><p class="text-sm text-gray-500">Forecast Ponderado</p><p id="weighted-value" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
+                        </div>
+                        <div class="indicator-card flex items-start gap-4 p-5">
+                            <div class="bg-amber-100 text-amber-600 p-3 rounded-lg"><i class="ph-bold ph-tag text-2xl"></i></div>
+                            <div><p class="text-sm text-gray-500">Ticket Médio (Ganho)</p><p id="average-ticket" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
+                        </div>
+                        <div class="indicator-card flex items-start gap-4 p-5">
+                            <div class="bg-emerald-100 text-emerald-600 p-3 rounded-lg"><i class="ph-bold ph-trophy text-2xl"></i></div>
+                            <div><p class="text-sm text-gray-500">Total Ganho</p><p id="won-value" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
+                        </div>
+                        <div class="indicator-card flex items-start gap-4 p-5">
+                            <div class="bg-slate-100 text-slate-600 p-3 rounded-lg"><i class="ph-bold ph-thumbs-down text-2xl"></i></div>
+                            <div><p class="text-sm text-gray-500">Total Perdido</p><p id="lost-value" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
+                        </div>
+                        <div class="indicator-card flex items-start gap-4 p-5">
+                            <div class="bg-rose-100 text-rose-600 p-3 rounded-lg"><i class="ph-bold ph-arrows-clockwise text-2xl"></i></div>
+                            <div><p class="text-sm text-gray-500">Taxa de Conversão</p><p id="conversion-rate" class="text-2xl font-bold text-gray-800">0%</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row gap-4 mb-6 border-b pb-6">
+                         <input type="text" id="newCardInput" class="flex-grow px-4 py-2 border border-gray-300 rounded-lg shadow-sm" placeholder="Nome do novo lead/negócio">
+                         <button onclick="addCard()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"><i class="ph-bold ph-plus-circle"></i> Adicionar</button>
+                    </div>
+                    <div class="kanban-board">
+                        <div class="kanban-column" data-column="prospect"><div class="kanban-column-header"><h3><i class="ph-fill ph-binoculars text-sky-500"></i> Prospectando</h3><div class="column-indicators" id="indicators-prospect"></div></div><div class="kanban-cards"></div></div>
+                        <div class="kanban-column" data-column="qualify"><div class="kanban-column-header"><h3><i class="ph-fill ph-lightbulb text-amber-500"></i> Qualificação</h3><div class="column-indicators" id="indicators-qualify"></div></div><div class="kanban-cards"></div></div>
+                        <div class="kanban-column" data-column="proposal"><div class="kanban-column-header"><h3><i class="ph-fill ph-file-text text-indigo-500"></i> Proposta</h3><div class="column-indicators" id="indicators-proposal"></div></div><div class="kanban-cards"></div></div>
+                        <div class="kanban-column" data-column="negotiate"><div class="kanban-column-header"><h3><i class="ph-fill ph-handshake text-rose-500"></i> Negociação</h3><div class="column-indicators" id="indicators-negotiate"></div></div><div class="kanban-cards"></div></div>
+                        <div class="kanban-column" data-column="won"><div class="kanban-column-header"><h3><i class="ph-fill ph-trophy text-emerald-500"></i> Ganho</h3><div class="column-indicators" id="indicators-won"></div></div><div class="kanban-cards"></div></div>
+                        <div class="kanban-column" data-column="lost"><div class="kanban-column-header"><h3><i class="ph-fill ph-x-circle text-slate-500"></i> Perdido</h3><div class="column-indicators" id="indicators-lost"></div></div><div class="kanban-cards"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Análise de Concorrência -->
+            <div id="concorrencia" class="tab-content">
+                <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+                     <h2 class="text-2xl font-bold mb-1">Análise de Concorrência</h2>
+                    <p class="text-gray-600 mb-6">Anote os pontos fortes e fracos dos seus principais concorrentes. As notas não ficam salvas.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-gray-50 p-4 rounded-lg"><input type="text" placeholder="Nome do Concorrente 1" class="w-full font-bold text-lg mb-2 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500"><label class="font-semibold mt-4 block">Pontos Fortes:</label><textarea class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" placeholder="Ex: Preço agressivo..."></textarea><label class="font-semibold mt-4 block">Pontos Fracos:</label><textarea class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" placeholder="Ex: Suporte ao cliente..."></textarea></div>
+                        <div class="bg-gray-50 p-4 rounded-lg"><input type="text" placeholder="Nome do Concorrente 2" class="w-full font-bold text-lg mb-2 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500"><label class="font-semibold mt-4 block">Pontos Fortes:</label><textarea class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32"></textarea><label class="font-semibold mt-4 block">Pontos Fracos:</label><textarea class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32"></textarea></div>
+                        <div class="bg-gray-50 p-4 rounded-lg"><input type="text" placeholder="Nome do Concorrente 3" class="w-full font-bold text-lg mb-2 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500"><label class="font-semibold mt-4 block">Pontos Fortes:</label><textarea class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32"></textarea><label class="font-semibold mt-4 block">Pontos Fracos:</label><textarea class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32"></textarea></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estratégias de Vendas -->
+            <div id="estrategias" class="tab-content">
+                 <div class="bg-white p-6 md:p-8 rounded-lg shadow-md space-y-10">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">Decifrando Perfis de Cliente</h2>
+                        <p class="text-gray-600 mb-6">Adapte sua abordagem ao estilo de cada cliente para aumentar suas chances de sucesso.</p>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Lobo -->
+                            <div class="bg-sky-50 p-5 rounded-lg border border-sky-200">
+                                <h3 class="font-bold text-xl mb-3 flex items-center gap-2"><i class="ph-bold ph-chart-bar text-sky-600"></i>Lobo (Analítico)</h3>
+                                <p class="font-semibold">Como identificar:</p>
+                                <ul class="list-disc list-inside text-gray-700 mt-1 mb-3"><li>Focado em dados, fatos e lógica.</li><li>Faz muitas perguntas técnicas.</li><li>Cético, não gosta de "conversa fiada".</li></ul>
+                                <p class="font-semibold">Como vender:</p>
+                                <ul class="list-disc list-inside text-gray-700 mt-1"><li>Apresente planilhas, gráficos e estudos de caso.</li><li>Seja preciso, direto e não pressione.</li><li>Dê tempo para ele analisar e decidir.</li></ul>
+                            </div>
+                            <!-- Águia -->
+                            <div class="bg-rose-50 p-5 rounded-lg border border-rose-200">
+                                <h3 class="font-bold text-xl mb-3 flex items-center gap-2"><i class="ph-bold ph-rocket-launch text-rose-600"></i>Águia (Decidido)</h3>
+                                <p class="font-semibold">Como identificar:</p>
+                                <ul class="list-disc list-inside text-gray-700 mt-1 mb-3"><li>Focado em resultados, objetivos e poder.</li><li>Direto, assertivo, parece impaciente.</li><li>Quer saber o "resumo da ópera".</li></ul>
+                                <p class="font-semibold">Como vender:</p>
+                                <ul class="list-disc list-inside text-gray-700 mt-1"><li>Seja rápido e vá direto ao ponto.</li><li>Mostre como sua solução o fará atingir metas.</li><li>Apresente 2-3 opções para ele sentir o controle.</li></ul>
+                            </div>
+                             <!-- Gato -->
+                            <div class="bg-amber-50 p-5 rounded-lg border border-amber-200">
+                                <h3 class="font-bold text-xl mb-3 flex items-center gap-2"><i class="ph-bold ph-hands-clapping text-amber-600"></i>Gato (Relacional)</h3>
+                                <p class="font-semibold">Como identificar:</p>
+                                <ul class="list-disc list-inside text-gray-700 mt-1 mb-3"><li>Focado em pessoas, confiança e relacionamentos.</li><li>Amigável, bom ouvinte, evita conflitos.</li></ul>
+                                <p class="font-semibold">Como vender:</p>
+                                <ul class="list-disc list-inside text-gray-700 mt-1"><li>Crie rapport primeiro, converse sobre amenidades.</li><li>Use depoimentos de outros clientes felizes.</li><li>Dê garantias e segurança. Ele compra de quem confia.</li></ul>
+                            </div>
+                            <!-- Pavão -->
+                            <div class="bg-indigo-50 p-5 rounded-lg border border-indigo-200">
+                                <h3 class="font-bold text-xl mb-3 flex items-center gap-2"><i class="ph-bold ph-microphone text-indigo-600"></i>Pavão (Expressivo)</h3>
+                                <p class="font-semibold">Como identificar:</p>
+                                <ul class="list-disc list-inside text-gray-700 mt-1 mb-3"><li>Focado em reconhecimento, ideias e inovação.</li><li>Entusiasmado, criativo, falante, gosta de atenção.</li></ul>
+                                <p class="font-semibold">Como vender:</p>
+                                <ul class="list-disc list-inside text-gray-700 mt-1"><li>Mostre como sua solução é inovadora.</li><li>Deixe-o falar e elogie suas ideias e visão.</li><li>Use visuais impactantes e foque nos sonhos e possibilidades.</li></ul>
+                            </div>
+                        </div>
+                        <div class="mt-8">
+                             <label class="font-bold text-xl mb-3 block">Anotações sobre o cliente atual:</label>
+                             <textarea class="w-full mt-1 p-3 border border-gray-300 rounded-lg h-32" placeholder="Ex: O cliente João parece ser um LOBO. Focar em apresentar o ROI do projeto na próxima reunião..."></textarea>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">Gatilhos Mentais Essenciais</h2>
+                        <p class="text-gray-600 mb-6">Técnicas de persuasão para acelerar o fechamento.</p>
+                        <div class="space-y-4">
+                           <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group"><summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">Prova Social</summary><p class="mt-2 text-gray-700"><strong>O que é:</strong> As pessoas tendem a seguir o comportamento da maioria. Se muitos usam, deve ser bom.<br><strong>Exemplo:</strong> "Já temos mais de 500 empresas no seu setor que usam nossa solução para otimizar o estoque."</p></details>
+                           <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group"><summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">Escassez & Urgência</summary><p class="mt-2 text-gray-700"><strong>O que é:</strong> As pessoas dão mais valor ao que é limitado no tempo ou na quantidade.<br><strong>Exemplo:</strong> "Temos apenas 3 vagas para implementação com esse valor promocional, e a oferta se encerra nesta sexta-feira."</p></details>
+                           <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group"><summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">Reciprocidade</summary><p class="mt-2 text-gray-700"><strong>O que é:</strong> A tendência natural de querer retribuir algo de valor que recebemos.<br><strong>Exemplo:</strong> "Com base na nossa conversa, preparei um diagnóstico rápido e gratuito da sua operação. Gostaria de ver?"</p></details>
+                           <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group"><summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">Autoridade</summary><p class="mt-2 text-gray-700"><strong>O que é:</strong> As pessoas confiam mais em quem se posiciona como um especialista.<br><strong>Exemplo:</strong> "Nossa metodologia foi premiada pela revista X e é baseada em 15 anos de experiência no mercado."</p></details>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        let draggedCard = null;
+        // Variável global para armazenar os dados do último cálculo bem-sucedido
+        let lastCalcState = {};
+
+        function changeTab(event, tabId) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // --- LÓGICA DAS CALCULADORAS ---
+        function formatCurrency(value) { return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+        
+        function preencherExemplo() {
+            document.getElementById('custoProduto').value = 80;
+            document.getElementById('frete').value = 15;
+            document.getElementById('impostos').value = 12;
+            document.getElementById('taxaPagamento').value = 4;
+            document.getElementById('comissao').value = 5;
+            document.getElementById('custoFixo').value = 0;
+            document.getElementById('margemLucro').value = 25;
+            document.getElementById('precoVenda').value = ''; // Limpa o preço para forçar o cálculo
+            analiseFinanceira('precificar');
+        }
+
+        function analiseFinanceira(modo) {
+            const custoProduto = parseFloat(document.getElementById('custoProduto').value) || 0;
+            const frete = parseFloat(document.getElementById('frete').value) || 0;
+            const percImpostos = parseFloat(document.getElementById('impostos').value) || 0;
+            const percTaxaPagamento = parseFloat(document.getElementById('taxaPagamento').value) || 0;
+            const percComissao = parseFloat(document.getElementById('comissao').value) || 0;
+            const percCustoFixo = parseFloat(document.getElementById('custoFixo').value) || 0;
+            const precoVendaInput = document.getElementById('precoVenda');
+            const margemLucroInput = document.getElementById('margemLucro');
+            const res = document.getElementById('resultadoAnalise');
+            const simulador = document.getElementById('simuladorNegociacao');
+
+            // Limpa resultados anteriores e esconde simulador
+            res.innerHTML = '';
+            simulador.classList.add('hidden');
+            lastCalcState = {};
+
+            let precoVendaFinal = 0;
+            let margemLucroFinal = 0;
+
+            const custoTotalDireto = custoProduto + frete;
+            if (custoTotalDireto <= 0) {
+                 res.innerHTML = `<p class="font-bold text-red-600 text-center py-10">O Custo do Produto + Frete deve ser maior que zero.</p>`;
+                 return;
+            }
+
+            const totalPercentuaisVariaveis = percImpostos + percTaxaPagamento + percComissao + percCustoFixo;
+
+            if (modo === 'precificar') {
+                const percLucroDesejado = parseFloat(margemLucroInput.value) || 0;
+                const totalPercentuais = totalPercentuaisVariaveis + percLucroDesejado;
+                if (totalPercentuais >= 100) {
+                    res.innerHTML = `<p class="font-bold text-red-600 text-center py-10">A soma de todos os percentuais (despesas + lucro) não pode ser 100% ou mais.</p>`;
+                    return;
+                }
+                const markupDivisor = 1 - (totalPercentuais / 100);
+                precoVendaFinal = custoTotalDireto / markupDivisor;
+                margemLucroFinal = percLucroDesejado;
+                precoVendaInput.value = precoVendaFinal.toFixed(2);
+            } else { // modo 'analisar'
+                precoVendaFinal = parseFloat(precoVendaInput.value) || 0;
+                if (precoVendaFinal <= custoTotalDireto) {
+                     res.innerHTML = `<p class="font-bold text-red-600 text-center py-10">O preço de venda deve ser maior que a soma do custo do produto e frete.</p>`;
+                    return;
+                }
+                const valorDespesasVariaveis = precoVendaFinal * (totalPercentuaisVariaveis / 100);
+                const lucroLiquido = precoVendaFinal - custoTotalDireto - valorDespesasVariaveis;
+                margemLucroFinal = (lucroLiquido / precoVendaFinal) * 100;
+                margemLucroInput.value = margemLucroFinal.toFixed(2);
+            }
+
+            // --- Geração dos Resultados ---
+            const valorImpostos = precoVendaFinal * (percImpostos / 100);
+            const valorTaxaPagamento = precoVendaFinal * (percTaxaPagamento / 100);
+            const valorComissao = precoVendaFinal * (percComissao / 100);
+            const valorCustoFixo = precoVendaFinal * (percCustoFixo / 100);
+            const lucroLiquidoFinal = precoVendaFinal - custoTotalDireto - valorImpostos - valorTaxaPagamento - valorComissao - valorCustoFixo;
+            
+            const totalCustosDespesas = custoTotalDireto + valorImpostos + valorTaxaPagamento + valorComissao + valorCustoFixo;
+            const markupMultiplicador = (custoProduto > 0) ? precoVendaFinal / custoProduto : 0;
+
+            const percCustoProduto = (precoVendaFinal > 0) ? (custoProduto / precoVendaFinal) * 100 : 0;
+            const percFrete = (precoVendaFinal > 0) ? (frete / precoVendaFinal) * 100 : 0;
+            const percDespesasTotais = (precoVendaFinal > 0) ? (totalCustosDespesas - custoTotalDireto) / precoVendaFinal * 100 : 0;
+            const percLucro = (precoVendaFinal > 0) ? (lucroLiquidoFinal / precoVendaFinal) * 100 : 0;
+
+             res.innerHTML = `
+                <h3 class="font-bold text-lg mb-4">Análise da Venda</h3>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700 mb-2">Composição do Preço de Venda (${formatCurrency(precoVendaFinal)})</p>
+                        <div class="w-full bg-gray-200 rounded-full h-6 flex overflow-hidden">
+                            <div class="bg-slate-500 h-6 text-white text-xs flex items-center justify-center" style="width: ${percCustoProduto + percFrete}%" title="Custos Diretos: ${(percCustoProduto + percFrete).toFixed(1)}%">${(percCustoProduto + percFrete) > 10 ? (percCustoProduto + percFrete).toFixed(0)+'%' : ''}</div>
+                            <div class="bg-amber-500 h-6 text-white text-xs flex items-center justify-center" style="width: ${percDespesasTotais}%" title="Despesas: ${percDespesasTotais.toFixed(1)}%">${percDespesasTotais > 10 ? percDespesasTotais.toFixed(0)+'%' : ''}</div>
+                            <div class="bg-emerald-500 h-6 text-white text-xs flex items-center justify-center" style="width: ${percLucro}%" title="Lucro Líquido: ${percLucro.toFixed(1)}%">${percLucro > 10 ? percLucro.toFixed(0)+'%' : ''}</div>
+                        </div>
+                        <div class="flex flex-wrap justify-start gap-4 mt-2 text-xs">
+                            <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-slate-500"></span>Custos Diretos</div>
+                            <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500"></span>Despesas</div>
+                            <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500"></span>Lucro Líquido</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mt-4 mb-2">Detalhamento dos Valores:</h4>
+                        <ul class="text-sm space-y-2 text-gray-700">
+                            <li class="flex justify-between border-b pb-1"><span>(-) Custo do Produto:</span> <span class="font-medium">${formatCurrency(custoProduto)}</span></li>
+                            <li class="flex justify-between border-b pb-1"><span>(-) Frete:</span> <span class="font-medium">${formatCurrency(frete)}</span></li>
+                            <li class="flex justify-between border-b pb-1"><span>(-) Impostos (${percImpostos.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorImpostos)}</span></li>
+                            <li class="flex justify-between border-b pb-1"><span>(-) Taxa de Pagamento (${percTaxaPagamento.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorTaxaPagamento)}</span></li>
+                            <li class="flex justify-between border-b pb-1"><span>(-) Comissão (${percComissao.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorComissao)}</span></li>
+                            <li class="flex justify-between border-b pb-1"><span>(-) Rateio Custo Fixo (${percCustoFixo.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorCustoFixo)}</span></li>
+                            <li class="flex justify-between pt-2 border-t mt-2 font-bold text-emerald-600"><span>(=) Lucro Líquido:</span> <span>${formatCurrency(lucroLiquidoFinal)}</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                        <div class="indicator-card text-center"><p class="text-sm text-gray-500">Lucro Líquido</p><p class="text-2xl font-bold text-emerald-600">${formatCurrency(lucroLiquidoFinal)}</p></div>
+                        <div class="indicator-card text-center"><p class="text-sm text-gray-500">Margem de Lucro</p><p class="text-2xl font-bold text-blue-600">${margemLucroFinal.toFixed(2).replace('.', ',')}%</p></div>
+                        <div class="indicator-card text-center"><p class="text-sm text-gray-500">Custo Total da Venda</p><p class="text-2xl font-bold text-slate-600">${formatCurrency(totalCustosDespesas)}</p></div>
+                        <div class="indicator-card text-center"><p class="text-sm text-gray-500">Markup Multiplicador</p><p class="text-2xl font-bold text-indigo-600">${markupMultiplicador.toFixed(2)}x</p></div>
+                    </div>
+                </div>
+            `;
+            
+            // Armazena os dados do cálculo e exibe o simulador
+            lastCalcState = { precoVendaFinal, custoTotalDireto, totalPercentuaisVariaveis };
+            simulador.classList.remove('hidden');
+            document.getElementById('resultadoSimularDesconto').innerHTML = '';
+            document.getElementById('resultadoDescontoMaximo').innerHTML = '';
+        }
+
+        function simularDesconto() {
+            const { precoVendaFinal, custoTotalDireto, totalPercentuaisVariaveis } = lastCalcState;
+            if (!precoVendaFinal) return; 
+
+            const resDiv = document.getElementById('resultadoSimularDesconto');
+            const descontoPerc = parseFloat(document.getElementById('simularDescontoInput').value) || 0;
+
+            if (descontoPerc < 0 || descontoPerc > 100) {
+                resDiv.innerHTML = `<p class="text-red-600 font-semibold text-center mt-2">O desconto deve ser entre 0% e 100%.</p>`;
+                return;
+            }
+
+            const novoPrecoVenda = precoVendaFinal * (1 - (descontoPerc / 100));
+            const valorDespesasVariaveis = novoPrecoVenda * (totalPercentuaisVariaveis / 100);
+            const novoLucroLiquido = novoPrecoVenda - custoTotalDireto - valorDespesasVariaveis;
+            const novaMargem = (novoPrecoVenda > 0) ? (novoLucroLiquido / novoPrecoVenda) * 100 : 0;
+
+            resDiv.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 text-center">
+                    <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Novo Preço</p><p class="font-bold text-indigo-600">${formatCurrency(novoPrecoVenda)}</p></div>
+                    <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Novo Lucro</p><p class="font-bold ${novoLucroLiquido > 0 ? 'text-emerald-600' : 'text-red-600'}">${formatCurrency(novoLucroLiquido)}</p></div>
+                    <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Nova Margem</p><p class="font-bold ${novaMargem > 0 ? 'text-blue-600' : 'text-red-600'}">${novaMargem.toFixed(2).replace('.',',')}%</p></div>
+                </div>
+            `;
+        }
+
+        function calcularDescontoMaximo() {
+            const { precoVendaFinal, custoTotalDireto, totalPercentuaisVariaveis } = lastCalcState;
+            if (!precoVendaFinal) return;
+
+            const resDiv = document.getElementById('resultadoDescontoMaximo');
+            const margemMinima = parseFloat(document.getElementById('descontoMaximoInput').value) || 0;
+            
+            const divisor = 1 - (totalPercentuaisVariaveis / 100) - (margemMinima / 100);
+
+            if (divisor <= 0) {
+                resDiv.innerHTML = `<p class="text-red-600 font-semibold text-center mt-2">Margem mínima muito alta. A soma das despesas e da margem não pode ser 100% ou mais.</p>`;
+                return;
+            }
+            
+            const precoMinimo = custoTotalDireto / divisor;
+
+            if (precoMinimo > precoVendaFinal) {
+                 resDiv.innerHTML = `<p class="text-amber-600 font-semibold text-center mt-2">A margem atual já é menor que a mínima desejada. Não é possível dar desconto.</p>`;
+                return;
+            }
+
+            const descontoMaximoPerc = ((precoVendaFinal - precoMinimo) / precoVendaFinal) * 100;
+
+             resDiv.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-center">
+                    <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Desconto Máximo</p><p class="font-bold text-rose-600">${descontoMaximoPerc.toFixed(2).replace('.',',')}%</p></div>
+                    <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Preço Final Mínimo</p><p class="font-bold text-slate-600">${formatCurrency(precoMinimo)}</p></div>
+                </div>
+            `;
+        }
+
+
+        function gerarScript() {
+            const nome = document.getElementById('scriptNomeCliente').value || "[Nome do Cliente]";
+            const empresa = document.getElementById('scriptNomeEmpresa').value || "[Empresa do Cliente]";
+            const produto = document.getElementById('scriptProduto').value || "[Seu Produto/Serviço]";
+            const dor = document.getElementById('scriptDor').value || "[Principal Dor/Problema]";
+            const res = document.getElementById('resultadoScript');
+            const script = `Olá ${nome}, tudo bem?\nMeu nome é [Seu Nome] e falo em nome da [Sua Empresa].\n\nVi que você atua na ${empresa} e percebi que empresas do seu segmento muitas vezes enfrentam desafios para ${dor}.\n\nNós ajudamos exatamente nisso com o nosso ${produto}. Temos um caso de sucesso que, após a implementação, conseguiu [Mencionar um benefício chave, ex: reduzir custos em 20%].\n\nVocê teria 10 minutos na próxima semana para uma breve conversa sobre como podemos ajudar a ${empresa} também?`;
+            res.textContent = script;
+            res.classList.remove('hidden');
+        }
+
+        // --- LÓGICA DO FUNIL KANBAN MODERNO ---
+        let cardIdCounter = 0;
+        function updateIndicators() {
+            let activeValue = 0, wonValue = 0, lostValue = 0, weightedValue = 0;
+            let activeCardsCount = 0, wonCardsCount = 0, lostCardsCount = 0;
+            
+            const activeColumns = ['prospect', 'qualify', 'proposal', 'negotiate'];
+            const probabilities = { prospect: 0.10, qualify: 0.30, proposal: 0.60, negotiate: 0.80 };
+
+            document.querySelectorAll('.kanban-column').forEach(column => {
+                const columnId = column.dataset.column;
+                const cards = column.querySelectorAll('.kanban-card');
+                let columnTotalValue = 0;
+                cards.forEach(card => { 
+                    columnTotalValue += parseFloat(card.querySelector('.card-value-input').value) || 0; 
+                });
+
+                document.getElementById(`indicators-${columnId}`).innerHTML = `<span>${formatCurrency(columnTotalValue)}</span> • <span>${cards.length} negócio(s)</span>`;
+                
+                if (activeColumns.includes(columnId)) { 
+                    activeValue += columnTotalValue; 
+                    activeCardsCount += cards.length;
+                    weightedValue += columnTotalValue * (probabilities[columnId] || 0);
+                }
+                else if (columnId === 'won') { 
+                    wonValue += columnTotalValue; 
+                    wonCardsCount += cards.length; 
+                }
+                else if (columnId === 'lost') { 
+                    lostValue += columnTotalValue;
+                    lostCardsCount += cards.length; 
+                }
+            });
+
+            document.getElementById('active-value').textContent = formatCurrency(activeValue);
+            document.getElementById('weighted-value').textContent = formatCurrency(weightedValue);
+            document.getElementById('won-value').textContent = formatCurrency(wonValue);
+            document.getElementById('lost-value').textContent = formatCurrency(lostValue);
+            
+            const averageTicket = wonCardsCount > 0 ? wonValue / wonCardsCount : 0;
+            document.getElementById('average-ticket').textContent = formatCurrency(averageTicket);
+            
+            const totalClosed = wonCardsCount + lostCardsCount;
+            const conversionRate = totalClosed > 0 ? (wonCardsCount / totalClosed) * 100 : 0;
+            document.getElementById('conversion-rate').textContent = `${conversionRate.toFixed(1).replace('.',',')}%`;
+        }
+
+        function addCard() {
+            const input = document.getElementById('newCardInput');
+            const text = input.value.trim();
+            if (text === '') return;
+            const card = document.createElement('div');
+            cardIdCounter++;
+            card.className = 'kanban-card'; card.draggable = true; card.id = 'card-' + cardIdCounter;
+            card.innerHTML = `<span class="card-title">${text}</span><div class="card-value"><span class="text-gray-500 text-sm">R$</span><input type="number" step="0.01" class="card-value-input" placeholder="0,00" oninput="updateIndicators()"></div>`;
+            addCardEventListeners(card);
+            document.querySelector('[data-column="prospect"] .kanban-cards').appendChild(card);
+            input.value = ''; updateIndicators();
+        }
+        function addCardEventListeners(card){
+            card.addEventListener('dragstart', (e) => { 
+                draggedCard = e.target;
+                setTimeout(() => e.target.classList.add('dragging'), 0);
+             });
+            card.addEventListener('dragend', () => { 
+                if(draggedCard) {
+                    draggedCard.classList.remove('dragging'); 
+                }
+                draggedCard = null;
+            });
+        }
+        document.querySelectorAll('.kanban-cards').forEach(column => {
+            column.addEventListener('dragover', e => { e.preventDefault(); 
+                const container = e.currentTarget;
+                container.classList.add('drag-over');
+            });
+            column.addEventListener('dragleave', e => { 
+                 e.currentTarget.classList.remove('drag-over');
+            });
+            column.addEventListener('drop', e => { 
+                e.preventDefault(); 
+                const container = e.currentTarget;
+                if (draggedCard && container.contains(draggedCard) === false) { 
+                    container.appendChild(draggedCard); 
+                    updateIndicators(); 
+                } 
+                container.classList.remove('drag-over'); 
+            });
+        });
+        document.addEventListener('DOMContentLoaded', updateIndicators);
+    </script>
+</body>
+</html>
+
