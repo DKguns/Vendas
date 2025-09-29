@@ -1264,11 +1264,7 @@
             const percCustoProduto = (precoVendaFinal > 0) ? (custoTotalDireto / precoVendaFinal) * 100 : 0;
             const percDespesasTotais = (precoVendaFinal > 0) ? ((totalCustosDespesas - custoTotalDireto) / precoVendaFinal) * 100 : 0;
             const percLucro = (precoVendaFinal > 0) ? (lucroLiquidoFinal / precoVendaFinal) * 100 : 0;
-
-            const sinalPercentual = parseFloat(document.getElementById('sinalPercentual').value) || 30;
-            const valorSinal = totalCustosDespesas * (sinalPercentual / 100);
-            const sinalInsuficiente = valorSinal < totalCustosDespesas;
-
+            
             res.innerHTML = `
                 <h3 class="font-bold text-lg mb-4">Análise da Venda</h3>
                 <div>
@@ -1295,21 +1291,15 @@
                         <li class="flex justify-between pt-2 border-t mt-2 font-bold text-emerald-600"><span>(=) Lucro Líquido:</span> <span>${formatCurrency(lucroLiquidoFinal)}</span></li>
                     </ul>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 mt-4">
-                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Lucro Líquido</p><p class="text-2xl font-bold text-emerald-600">${formatCurrency(lucroLiquidoFinal)}</p></div>
-                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Margem de Lucro</p><p class="text-2xl font-bold text-blue-600">${margemLucroFinal.toFixed(2).replace('.', ',')}%</p></div>
-                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Custo Total da Venda</p><p class="text-2xl font-bold text-slate-600">${formatCurrency(totalCustosDespesas)}</p></div>
-                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Markup Multiplicador</p><p class="text-2xl font-bold text-indigo-600">${markupMultiplicador.toFixed(2)}x</p></div>
-                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Valor Final de Venda</p><p class="text-2xl font-bold text-blue-600">${formatCurrency(precoVendaFinal)}</p></div>
-                    <div class="indicator-card text-center ${sinalInsuficiente ? 'bg-red-50 border-red-200' : ''}">
-                        <p class="text-sm ${sinalInsuficiente ? 'text-red-800' : 'text-gray-500'}">Sinal Sugerido (${sinalPercentual}%)</p>
-                        <p class="text-2xl font-bold ${sinalInsuficiente ? 'text-red-600' : 'text-gray-800'}">${formatCurrency(valorSinal)}</p>
-                        ${sinalInsuficiente ? '<p class="text-xs text-red-700 mt-1">Atenção: Sinal não cobre os custos!</p>' : ''}
-                    </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 mt-4">
+                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Lucro Líquido</p><p class="text-xl font-bold text-emerald-600">${formatCurrency(lucroLiquidoFinal)}</p></div>
+                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Margem de Lucro</p><p class="text-xl font-bold text-blue-600">${margemLucroFinal.toFixed(2).replace('.', ',')}%</p></div>
+                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Custo Total da Venda</p><p class="text-xl font-bold text-slate-600">${formatCurrency(totalCustosDespesas)}</p></div>
+                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Markup Multiplicador</p><p class="text-xl font-bold text-indigo-600">${markupMultiplicador.toFixed(2)}x</p></div>
                 </div>
             `;
             
-            lastCalcState = { precoVendaFinal, custoTotalDireto, totalCustosDespesas, totalPercentuaisVariaveis, lucroLiquidoFinal, valorTaxaPagamento, valorImpostos, valorSinal };
+            lastCalcState = { precoVendaFinal, custoTotalDireto, totalCustosDespesas, totalPercentuaisVariaveis, lucroLiquidoFinal, valorTaxaPagamento, valorImpostos };
             simulador.classList.remove('hidden');
             document.getElementById('resultadoSimularDesconto').innerHTML = '';
             document.getElementById('simularDescontoInput').value = '';
@@ -1359,9 +1349,9 @@
             resDiv.innerHTML = `
                 <h3 class="font-bold text-lg mb-4 text-teal-700">Resultados de ROI para o Cliente</h3>
                 <div class="space-y-4">
-                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Tempo de Retorno (Payback)</p><p class="text-2xl font-bold text-teal-600">${paybackMeses.toFixed(1).replace('.',',')} meses</p></div>
-                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">ROI em ${periodoAnalise} Meses</p><p class="text-2xl font-bold text-teal-600">+${roiPeriodo.toFixed(2).replace('.',',')}%</p></div>
-                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Lucro do Cliente (em ${periodoAnalise} meses)</p><p class="text-2xl font-bold text-teal-600">${formatCurrency(lucroClientePeriodo)}</p></div>
+                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Tempo de Retorno (Payback)</p><p class="text-xl md:text-2xl font-bold text-teal-600">${paybackMeses.toFixed(1).replace('.',',')} meses</p></div>
+                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">ROI em ${periodoAnalise} Meses</p><p class="text-xl md:text-2xl font-bold text-teal-600">+${roiPeriodo.toFixed(2).replace('.',',')}%</p></div>
+                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Lucro do Cliente (em ${periodoAnalise} meses)</p><p class="text-xl md:text-2xl font-bold text-teal-600">${formatCurrency(lucroClientePeriodo)}</p></div>
                 </div>
                  <p class="text-xs text-center text-gray-500 mt-4">"Com este investimento, em ${periodoAnalise} meses terá um retorno de ${roiPeriodo.toFixed(0)}% e um lucro de ${formatCurrency(lucroClientePeriodo)}."</p>
             `;
@@ -1419,7 +1409,7 @@
 
                     <div class="indicator-card text-center !mt-6 ${economiaTotal >= 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}">
                         <p class="text-sm ${economiaTotal >= 0 ? 'text-emerald-800' : 'text-rose-800'}">Economia para o cliente em ${periodo} anos</p>
-                        <p class="text-3xl font-bold ${economiaTotal >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${formatCurrency(economiaTotal)}</p>
+                        <p class="text-2xl md:text-3xl font-bold ${economiaTotal >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${formatCurrency(economiaTotal)}</p>
                     </div>
                 </div>
                  <p class="text-xs text-center text-gray-500 mt-4">"Embora o preço inicial possa ser diferente, ao longo de ${periodo} anos, a nossa solução representa uma economia de ${formatCurrency(economiaTotal)} para a sua empresa."</p>
@@ -1518,6 +1508,20 @@
                 return;
             }
 
+            const sinalCobreCustos = valorSinal >= totalCustosDespesas;
+
+            let sinalCardHtml = '';
+            if (usarSinal) {
+                sinalCardHtml = `
+                    <div class="indicator-card text-center col-span-2 ${sinalCobreCustos ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}">
+                        <p class="text-sm ${sinalCobreCustos ? 'text-emerald-800' : 'text-red-800'}">Valor do Sinal</p>
+                        <p class="text-xl font-bold ${sinalCobreCustos ? 'text-emerald-600' : 'text-red-600'}">${formatCurrency(valorSinal)}</p>
+                        ${!sinalCobreCustos ? '<p class="text-xs text-red-700 mt-1">Atenção: Sinal não cobre os custos!</p>' : ''}
+                    </div>
+                `;
+            }
+
+
             if (quemPaga === 'empresa') {
                 const valorParcela = numParcelas > 0 ? valorAParcelar / numParcelas : valorAParcelar;
                 const novaTaxaValor = valorAParcelar * (taxaParcelamento / 100);
@@ -1527,9 +1531,10 @@
 
                 resDiv.innerHTML = `
                     <div class="grid grid-cols-2 gap-2 mt-3 text-center">
-                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Valor do Sinal</p><p class="font-bold text-gray-700">${formatCurrency(valorSinal)}</p></div>
+                        ${sinalCardHtml}
                         <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Saldo a Parcelar</p><p class="font-bold text-gray-700">${formatCurrency(valorAParcelar)}</p></div>
-                        <div class="bg-white p-2 rounded-md col-span-2"><p class="text-xs text-gray-500">Valor da Parcela</p><p class="font-bold text-cyan-600">${numParcelas}x de ${formatCurrency(valorParcela)}</p></div>
+                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Nº de Parcelas</p><p class="font-bold text-gray-700">${numParcelas}x</p></div>
+                        <div class="bg-white p-2 rounded-md col-span-2"><p class="text-xs text-gray-500">Valor da Parcela</p><p class="font-bold text-cyan-600">${formatCurrency(valorParcela)}</p></div>
                         <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Seu Lucro Real</p><p class="font-bold ${novoLucro >= 0 ? 'text-emerald-600' : 'text-red-600'}">${formatCurrency(novoLucro)}</p></div>
                         <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Sua Margem Real</p><p class="font-bold ${novaMargem >= 0 ? 'text-blue-600' : 'text-red-600'}">${novaMargem.toFixed(2).replace('.',',')}%</p></div>
                     </div>
@@ -1543,9 +1548,10 @@
                 resDiv.innerHTML = `
                      <div class="grid grid-cols-2 gap-2 mt-3 text-center">
                         <div class="bg-white p-2 rounded-md col-span-2"><p class="text-xs text-gray-500">Novo Preço Final (p/ Cliente)</p><p class="font-bold text-indigo-600">${formatCurrency(novoPrecoCliente)}</p></div>
-                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Valor do Sinal</p><p class="font-bold text-gray-700">${formatCurrency(valorSinal)}</p></div>
+                        ${sinalCardHtml}
                         <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Saldo a Parcelar</p><p class="font-bold text-gray-700">${formatCurrency(novoValorAParcelar)}</p></div>
-                        <div class="bg-white p-2 rounded-md col-span-2"><p class="text-xs text-gray-500">Valor da Parcela</p><p class="font-bold text-cyan-600">${numParcelas}x de ${formatCurrency(valorParcela)}</p></div>
+                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Nº de Parcelas</p><p class="font-bold text-gray-700">${numParcelas}x</p></div>
+                        <div class="bg-white p-2 rounded-md col-span-2"><p class="text-xs text-gray-500">Valor da Parcela</p><p class="font-bold text-cyan-600">${formatCurrency(valorParcela)}</p></div>
                     </div>
                     <p class="text-xs text-center text-emerald-600 mt-2">Seu lucro e margem originais são mantidos!</p>
                 `;
