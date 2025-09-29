@@ -268,7 +268,7 @@
                                         </div>
                                         <div class="space-y-4">
                                             <h3 class="font-semibold text-lg border-b pb-2">2. Despesas da Venda</h3>
-                                            <div><label for="impostosVenda" class="block text-sm font-medium text-gray-700 tooltip-container">Impostos Sobre a Venda (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual total de impostos que incidem sobre o preço final da venda (Ex: IPI, ICMS, PIS, COFINS de saída).</span></label><input type="number" id="impostosVenda" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="18"></div>
+                                            <div><label for="impostosVenda" class="block text-sm font-medium text-gray-700 tooltip-container">Impostos Sobre a Venda (Ex: IPI, ICMS...) (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual total de impostos que incidem sobre o preço final da venda (Ex: IPI, ICMS, PIS, COFINS de saída).</span></label><input type="number" id="impostosVenda" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="18"></div>
                                             <div><label for="taxaPagamentoUnico" class="block text-sm font-medium text-gray-700 tooltip-container">Taxa Pagamento (à vista) (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual da taxa da maquininha de cartão, gateway de pagamento ou boleto para pagamento à vista.</span></label><input type="number" id="taxaPagamentoUnico" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="4.5"></div>
                                             <div><label for="comissaoUnico" class="block text-sm font-medium text-gray-700 tooltip-container">Comissão (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual de comissão a ser pago ao vendedor sobre o preço da venda.</span></label><input type="number" id="comissaoUnico" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="5"></div>
                                             <div><label for="custoFixoUnico" class="block text-sm font-medium text-gray-700 tooltip-container">Rateio Custo Fixo (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Opcional. Um percentual do preço da venda para ajudar a cobrir custos fixos da empresa (aluguel, salários, etc.).</span></label><input type="number" id="custoFixoUnico" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="3"></div>
@@ -434,8 +434,24 @@
                                     <!-- Simular Parcelamento -->
                                     <div class="bg-gray-50 p-4 rounded-lg">
                                         <h3 class="font-semibold text-lg">3. Como fica o lucro se eu parcelar?</h3>
+
+                                        <!-- Opção de Sinal/Entrada -->
+                                        <div class="mt-3 space-y-2">
+                                            <div class="flex items-center">
+                                                <input id="usarSinal" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                                <label for="usarSinal" class="ml-2 block text-sm font-medium text-gray-900">Incluir Sinal/Entrada</label>
+                                            </div>
+                                            <div id="sinalInputsContainer" class="hidden pl-6">
+                                                <div class="flex items-center gap-2 bg-white p-2 rounded-lg border">
+                                                    <label for="sinalPercentual" class="text-sm whitespace-nowrap">Sinal de:</label>
+                                                    <input type="number" id="sinalPercentual" class="w-20 px-2 py-1 border border-gray-300 rounded-md" value="30">
+                                                    <label for="sinalPercentual" class="text-sm">% do Custo Total</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div class="mt-3">
-                                            <label class="text-sm font-medium text-gray-700">Quem assume a taxa?</label>
+                                            <label class="text-sm font-medium text-gray-700">Quem assume a taxa do parcelamento?</label>
                                             <div class="flex gap-2 mt-1" id="quemPagaTaxaContainer">
                                                 <button type="button" data-value="empresa" class="quem-paga-btn active flex-1">Fornecedor</button>
                                                 <button type="button" data-value="cliente" class="quem-paga-btn flex-1">Cliente</button>
@@ -1119,7 +1135,6 @@
             const icms = parseFloat(icmsInput.value) || 0;
 
             if (!nome || custo <= 0) {
-                // Substituindo alert por uma UI mais amigável
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'text-red-500 text-center text-sm my-2';
                 errorDiv.textContent = 'Por favor, preencha o nome e um custo válido.';
@@ -1167,27 +1182,6 @@
                 custoTotal += custoFinalItem * qtd;
             });
             document.getElementById('custoTotalKit').textContent = formatCurrency(custoTotal);
-        }
-
-        function recalcularSinal() {
-            const { custoTotalDireto } = lastCalcState;
-            if (custoTotalDireto === undefined || custoTotalDireto <= 0) {
-                const container = document.getElementById('valorSinalContainer');
-                if (container) container.innerHTML = '';
-                return;
-            }
-
-            const percentual = parseFloat(document.getElementById('sinalPercentual').value) || 0;
-            const valorSinal = custoTotalDireto * (percentual / 100);
-
-            const container = document.getElementById('valorSinalContainer');
-            if (container) {
-                 container.innerHTML = `
-                    <div class="indicator-card text-center bg-yellow-50 border-yellow-200">
-                        <p class="text-sm text-yellow-800">Valor do Sinal (${percentual}%)</p>
-                        <p class="text-2xl font-bold text-yellow-700">${formatCurrency(valorSinal)}</p>
-                    </div>`;
-            }
         }
         
         function analiseFinanceira(modo) {
@@ -1303,20 +1297,9 @@
                     <div class="indicator-card text-center"><p class="text-sm text-gray-500">Custo Total da Venda</p><p class="text-2xl font-bold text-slate-600">${formatCurrency(totalCustosDespesas)}</p></div>
                     <div class="indicator-card text-center"><p class="text-sm text-gray-500">Markup Multiplicador</p><p class="text-2xl font-bold text-indigo-600">${markupMultiplicador.toFixed(2)}x</p></div>
                 </div>
-                <div class="mt-4 pt-4 border-t">
-                    <h4 class="font-semibold text-gray-800 mb-2">Desembolso de Caixa (Sinal)</h4>
-                    <div class="flex items-center gap-2 bg-gray-50 p-3 rounded-lg">
-                        <label for="sinalPercentual" class="text-sm whitespace-nowrap">Sugerir sinal de:</label>
-                        <input type="number" id="sinalPercentual" class="w-20 px-2 py-1 border border-gray-300 rounded-md" value="30" oninput="window.recalcularSinal()">
-                        <label for="sinalPercentual" class="text-sm">% do Custo Efetivo</label>
-                    </div>
-                    <div id="valorSinalContainer" class="mt-2">
-                        <!-- Result will be injected here by JS -->
-                    </div>
-                </div>
             `;
             
-            lastCalcState = { precoVendaFinal, custoTotalDireto, totalPercentuaisVariaveis, lucroLiquidoFinal, valorTaxaPagamento, valorImpostos };
+            lastCalcState = { precoVendaFinal, custoTotalDireto, totalCustosDespesas, totalPercentuaisVariaveis, lucroLiquidoFinal, valorTaxaPagamento, valorImpostos };
             simulador.classList.remove('hidden');
             document.getElementById('resultadoSimularDesconto').innerHTML = '';
             document.getElementById('simularDescontoInput').value = '';
@@ -1325,7 +1308,6 @@
             document.getElementById('resultadoParcelamento').innerHTML = '';
             document.getElementById('numParcelasInput').value = '';
             document.getElementById('taxaParcelamentoInput').value = '';
-            recalcularSinal();
         }
         
         function usarUltimoPreco() {
@@ -1495,50 +1477,65 @@
         }
         
         function calcularParcelamento() {
-            const { precoVendaFinal, lucroLiquidoFinal, valorTaxaPagamento } = lastCalcState;
-            if (!precoVendaFinal) return;
+            const { precoVendaFinal, lucroLiquidoFinal, valorTaxaPagamento, totalCustosDespesas } = lastCalcState;
+            if (!precoVendaFinal) {
+                const resDiv = document.getElementById('resultadoParcelamento');
+                resDiv.innerHTML = `<p class="text-red-600 font-semibold text-center mt-2">Calcule um preço na seção de Lucratividade primeiro.</p>`;
+                return;
+            }
 
             const resDiv = document.getElementById('resultadoParcelamento');
+            resDiv.innerHTML = '';
             const numParcelas = parseInt(document.getElementById('numParcelasInput').value) || 1;
             const taxaParcelamento = parseFloat(document.getElementById('taxaParcelamentoInput').value) || 0;
             const quemPaga = document.querySelector('.quem-paga-btn.active').dataset.value;
+            const usarSinal = document.getElementById('usarSinal').checked;
+
+            let valorSinal = 0;
+            if (usarSinal) {
+                const sinalPercentual = parseFloat(document.getElementById('sinalPercentual').value) || 0;
+                valorSinal = totalCustosDespesas * (sinalPercentual / 100);
+            }
+            
+            const valorAParcelar = precoVendaFinal - valorSinal;
 
             if (numParcelas <= 0) {
                 resDiv.innerHTML = `<p class="text-red-600 font-semibold text-center mt-2">O número de parcelas deve ser maior que zero.</p>`;
                 return;
             }
+             if (valorAParcelar < 0) {
+                resDiv.innerHTML = `<p class="text-red-600 font-semibold text-center mt-2">O valor do sinal não pode ser maior que o preço de venda.</p>`;
+                return;
+            }
 
             if (quemPaga === 'empresa') {
-                const valorParcela = precoVendaFinal / numParcelas;
-                const valorNovaTaxa = precoVendaFinal * (taxaParcelamento / 100);
-                const diferencaDeCusto = valorNovaTaxa - valorTaxaPagamento;
-                const novoLucro = lucroLiquidoFinal - diferencaDeCusto;
-                const novaMargem = (precoVendaFinal > 0) ? (novoLucro / precoVendaFinal) * 100 : 0;
-                const mudancaCustoTexto = diferencaDeCusto > 0 
-                    ? `<p class="text-xs text-center text-red-600 mt-2">Custo adicional da taxa: ${formatCurrency(diferencaDeCusto)}</p>` 
-                    : (diferencaDeCusto < 0 ? `<p class="text-xs text-center text-emerald-600 mt-2">Economia na taxa: ${formatCurrency(-diferencaDeCusto)}</p>` : '');
+                const valorParcela = numParcelas > 0 ? valorAParcelar / numParcelas : valorAParcelar;
+                const novaTaxaValor = valorAParcelar * (taxaParcelamento / 100);
+                const custoAdicionalTaxa = novaTaxaValor - valorTaxaPagamento;
+                const novoLucro = lucroLiquidoFinal - custoAdicionalTaxa;
+                const novaMargem = precoVendaFinal > 0 ? (novoLucro / precoVendaFinal) * 100 : 0;
 
                 resDiv.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-center">
-                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Valor da Parcela</p><p class="font-bold text-cyan-600">${numParcelas}x de ${formatCurrency(valorParcela)}</p></div>
-                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Lucro Real</p><p class="font-bold ${novoLucro >= 0 ? 'text-emerald-600' : 'text-red-600'}">${formatCurrency(novoLucro)}</p></div>
-                        <div class="bg-white p-2 rounded-md md:col-span-2"><p class="text-xs text-gray-500">Margem Real</p><p class="font-bold ${novaMargem >= 0 ? 'text-blue-600' : 'text-red-600'}">${novaMargem.toFixed(2).replace('.',',')}%</p></div>
+                    <div class="grid grid-cols-2 gap-2 mt-3 text-center">
+                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Valor do Sinal</p><p class="font-bold text-gray-700">${formatCurrency(valorSinal)}</p></div>
+                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Saldo a Parcelar</p><p class="font-bold text-gray-700">${formatCurrency(valorAParcelar)}</p></div>
+                        <div class="bg-white p-2 rounded-md col-span-2"><p class="text-xs text-gray-500">Valor da Parcela</p><p class="font-bold text-cyan-600">${numParcelas}x de ${formatCurrency(valorParcela)}</p></div>
+                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Seu Lucro Real</p><p class="font-bold ${novoLucro >= 0 ? 'text-emerald-600' : 'text-red-600'}">${formatCurrency(novoLucro)}</p></div>
+                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Sua Margem Real</p><p class="font-bold ${novaMargem >= 0 ? 'text-blue-600' : 'text-red-600'}">${novaMargem.toFixed(2).replace('.',',')}%</p></div>
                     </div>
-                    ${mudancaCustoTexto}
                 `;
-            } else { 
-                const valorTaxaAbsoluto = precoVendaFinal / (1 - (taxaParcelamento/100)) - precoVendaFinal;
+            } else { // 'cliente'
+                const valorTaxaAbsoluto = valorAParcelar > 0 ? (valorAParcelar / (1 - (taxaParcelamento / 100))) - valorAParcelar : 0;
+                const novoValorAParcelar = valorAParcelar + valorTaxaAbsoluto;
                 const novoPrecoCliente = precoVendaFinal + valorTaxaAbsoluto;
-                const valorParcela = novoPrecoCliente / numParcelas;
+                const valorParcela = numParcelas > 0 ? novoValorAParcelar / numParcelas : novoValorAParcelar;
                 
                 resDiv.innerHTML = `
-                    <div class="bg-white p-2 rounded-md text-center">
-                        <p class="text-xs text-gray-500">Novo Preço Final (p/ Cliente)</p>
-                        <p class="font-bold text-indigo-600">${formatCurrency(novoPrecoCliente)}</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 text-center">
-                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Valor da Parcela</p><p class="font-bold text-cyan-600">${numParcelas}x de ${formatCurrency(valorParcela)}</p></div>
-                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Lucro (Empresa)</p><p class="font-bold text-emerald-600">${formatCurrency(lucroLiquidoFinal)}</p></div>
+                     <div class="grid grid-cols-2 gap-2 mt-3 text-center">
+                        <div class="bg-white p-2 rounded-md col-span-2"><p class="text-xs text-gray-500">Novo Preço Final (p/ Cliente)</p><p class="font-bold text-indigo-600">${formatCurrency(novoPrecoCliente)}</p></div>
+                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Valor do Sinal</p><p class="font-bold text-gray-700">${formatCurrency(valorSinal)}</p></div>
+                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Saldo a Parcelar</p><p class="font-bold text-gray-700">${formatCurrency(novoValorAParcelar)}</p></div>
+                        <div class="bg-white p-2 rounded-md col-span-2"><p class="text-xs text-gray-500">Valor da Parcela</p><p class="font-bold text-cyan-600">${numParcelas}x de ${formatCurrency(valorParcela)}</p></div>
                     </div>
                     <p class="text-xs text-center text-emerald-600 mt-2">Seu lucro e margem originais são mantidos!</p>
                 `;
@@ -1878,7 +1875,6 @@
             window.changeCalcMode = changeCalcMode;
             window.changeSubCalcMode = changeSubCalcMode;
             window.analiseFinanceira = analiseFinanceira;
-            window.recalcularSinal = recalcularSinal;
             window.usarUltimoPreco = usarUltimoPreco;
             window.calcularRoi = calcularRoi;
             window.calcularTco = calcularTco;
@@ -1974,6 +1970,13 @@
                     e.target.classList.add('active');
                 }
             });
+
+            const usarSinalCheckbox = document.getElementById('usarSinal');
+            const sinalInputsContainer = document.getElementById('sinalInputsContainer');
+            usarSinalCheckbox.addEventListener('change', () => {
+                sinalInputsContainer.classList.toggle('hidden', !usarSinalCheckbox.checked);
+            });
+
 
             // Define o listener de autenticação
             onAuthStateChanged(auth, user => {
