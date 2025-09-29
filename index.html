@@ -263,11 +263,12 @@
                                         <div class="space-y-4">
                                             <h3 class="font-semibold text-lg border-b pb-2">1. Custos Diretos</h3>
                                             <div><label for="custoProduto" class="block text-sm font-medium text-gray-700 tooltip-container">Custo do Produto (R$) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Valor pago ao fornecedor pela mercadoria que está sendo vendida.</span></label><input type="number" id="custoProduto" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="100.00"></div>
+                                            <div><label for="impostosRecuperaveis" class="block text-sm font-medium text-gray-700 tooltip-container">Impostos Recuperáveis na Compra (R$) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Valor total dos impostos (ICMS, PIS/COFINS) que sua empresa credita ao comprar este produto. Este valor reduz o custo efetivo.</span></label><input type="number" id="impostosRecuperaveis" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="12.00"></div>
                                             <div><label for="frete" class="block text-sm font-medium text-gray-700 tooltip-container">Frete (R$) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Custo de transporte para entregar o produto ao cliente, caso seja pago pela sua empresa.</span></label><input type="number" id="frete" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="25.00"></div>
                                         </div>
                                         <div class="space-y-4">
                                             <h3 class="font-semibold text-lg border-b pb-2">2. Despesas da Venda</h3>
-                                            <div><label for="impostosUnico" class="block text-sm font-medium text-gray-700 tooltip-container">Impostos (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual total de impostos que incidem sobre o preço da venda (Ex: ICMS, PIS, COFINS).</span></label><input type="number" id="impostosUnico" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="10"></div>
+                                            <div><label for="impostosVenda" class="block text-sm font-medium text-gray-700 tooltip-container">Impostos Sobre a Venda (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual total de impostos que incidem sobre o preço final da venda (Ex: IPI, ICMS, PIS, COFINS de saída).</span></label><input type="number" id="impostosVenda" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="18"></div>
                                             <div><label for="taxaPagamentoUnico" class="block text-sm font-medium text-gray-700 tooltip-container">Taxa Pagamento (à vista) (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual da taxa da maquininha de cartão, gateway de pagamento ou boleto para pagamento à vista.</span></label><input type="number" id="taxaPagamentoUnico" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="4.5"></div>
                                             <div><label for="comissaoUnico" class="block text-sm font-medium text-gray-700 tooltip-container">Comissão (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual de comissão a ser pago ao vendedor sobre o preço da venda.</span></label><input type="number" id="comissaoUnico" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="5"></div>
                                             <div><label for="custoFixoUnico" class="block text-sm font-medium text-gray-700 tooltip-container">Rateio Custo Fixo (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Opcional. Um percentual do preço da venda para ajudar a cobrir custos fixos da empresa (aluguel, salários, etc.).</span></label><input type="number" id="custoFixoUnico" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="3"></div>
@@ -436,7 +437,7 @@
                                         <div class="mt-3">
                                             <label class="text-sm font-medium text-gray-700">Quem assume a taxa?</label>
                                             <div class="flex gap-2 mt-1" id="quemPagaTaxaContainer">
-                                                <button type="button" data-value="empresa" class="quem-paga-btn active flex-1">Nós (Empresa)</button>
+                                                <button type="button" data-value="empresa" class="quem-paga-btn active flex-1">Fornecedor</button>
                                                 <button type="button" data-value="cliente" class="quem-paga-btn flex-1">Cliente</button>
                                             </div>
                                         </div>
@@ -1167,6 +1168,27 @@
             });
             document.getElementById('custoTotalKit').textContent = formatCurrency(custoTotal);
         }
+
+        function recalcularSinal() {
+            const { custoTotalDireto } = lastCalcState;
+            if (custoTotalDireto === undefined || custoTotalDireto <= 0) {
+                const container = document.getElementById('valorSinalContainer');
+                if (container) container.innerHTML = '';
+                return;
+            }
+
+            const percentual = parseFloat(document.getElementById('sinalPercentual').value) || 0;
+            const valorSinal = custoTotalDireto * (percentual / 100);
+
+            const container = document.getElementById('valorSinalContainer');
+            if (container) {
+                 container.innerHTML = `
+                    <div class="indicator-card text-center bg-yellow-50 border-yellow-200">
+                        <p class="text-sm text-yellow-800">Valor do Sinal (${percentual}%)</p>
+                        <p class="text-2xl font-bold text-yellow-700">${formatCurrency(valorSinal)}</p>
+                    </div>`;
+            }
+        }
         
         function analiseFinanceira(modo) {
             let custoTotalDireto = 0;
@@ -1175,9 +1197,10 @@
 
             if (currentSubCalcMode === 'unico') {
                 custoProduto = parseFloat(document.getElementById('custoProduto').value) || 0;
+                const impostosRecuperaveis = parseFloat(document.getElementById('impostosRecuperaveis').value) || 0;
                 const frete = parseFloat(document.getElementById('frete').value) || 0;
-                custoTotalDireto = custoProduto + frete;
-                percImpostos = parseFloat(document.getElementById('impostosUnico').value) || 0;
+                custoTotalDireto = custoProduto + frete - impostosRecuperaveis;
+                percImpostos = parseFloat(document.getElementById('impostosVenda').value) || 0;
                 percTaxaPagamento = parseFloat(document.getElementById('taxaPagamentoUnico').value) || 0;
                 percComissao = parseFloat(document.getElementById('comissaoUnico').value) || 0;
                 percCustoFixo = parseFloat(document.getElementById('custoFixoUnico').value) || 0;
@@ -1206,7 +1229,7 @@
             lastCalcState = {};
 
             if (custoTotalDireto <= 0) {
-                 res.innerHTML = `<p class="font-bold text-red-600 text-center py-10">O Custo Total dos Itens deve ser maior que zero.</p>`;
+                 res.innerHTML = `<p class="font-bold text-red-600 text-center py-10">O Custo Efetivo (Custo - Impostos Recuperáveis) deve ser maior que zero.</p>`;
                  return;
             }
 
@@ -1228,7 +1251,7 @@
             } else { 
                 precoVendaFinal = parseFloat(precoVendaInput.value) || 0;
                 if (precoVendaFinal <= custoTotalDireto) {
-                     res.innerHTML = `<p class="font-bold text-red-600 text-center py-10">O preço de venda deve ser maior que a soma dos custos.</p>`;
+                     res.innerHTML = `<p class="font-bold text-red-600 text-center py-10">O preço de venda deve ser maior que a soma dos custos efetivos.</p>`;
                     return;
                 }
                 const valorDespesasVariaveis = precoVendaFinal * (totalPercentuaisVariaveis / 100);
@@ -1258,7 +1281,7 @@
                         <div class="bg-emerald-500 h-6 text-white text-xs flex items-center justify-center" style="width: ${percLucro}%" title="Lucro Líquido: ${percLucro.toFixed(1)}%">${percLucro > 10 ? percLucro.toFixed(0)+'%' : ''}</div>
                     </div>
                     <div class="flex flex-wrap justify-start gap-4 mt-2 text-xs">
-                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-slate-500"></span>Custos Diretos</div>
+                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-slate-500"></span>Custos Diretos Efetivos</div>
                         <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500"></span>Despesas</div>
                         <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500"></span>Lucro Líquido</div>
                     </div>
@@ -1266,8 +1289,8 @@
                 <div>
                     <h4 class="font-semibold text-gray-800 mt-4 mb-2">Detalhamento dos Valores:</h4>
                     <ul class="text-sm space-y-2 text-gray-700">
-                        <li class="flex justify-between border-b pb-1"><span>(-) Custos Totais:</span> <span class="font-medium">${formatCurrency(custoTotalDireto)}</span></li>
-                        <li class="flex justify-between border-b pb-1"><span>(-) Impostos:</span> <span class="font-medium">${formatCurrency(valorImpostos)}</span></li>
+                        <li class="flex justify-between border-b pb-1"><span>(-) Custos Totais Efetivos:</span> <span class="font-medium">${formatCurrency(custoTotalDireto)}</span></li>
+                        <li class="flex justify-between border-b pb-1"><span>(-) Impostos Sobre a Venda:</span> <span class="font-medium">${formatCurrency(valorImpostos)}</span></li>
                         <li class="flex justify-between border-b pb-1"><span>(-) Taxa de Pagamento (${percTaxaPagamento.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorTaxaPagamento)}</span></li>
                         <li class="flex justify-between border-b pb-1"><span>(-) Comissão (${percComissao.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorComissao)}</span></li>
                         <li class="flex justify-between border-b pb-1"><span>(-) Rateio Custo Fixo (${percCustoFixo.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorCustoFixo)}</span></li>
@@ -1280,6 +1303,17 @@
                     <div class="indicator-card text-center"><p class="text-sm text-gray-500">Custo Total da Venda</p><p class="text-2xl font-bold text-slate-600">${formatCurrency(totalCustosDespesas)}</p></div>
                     <div class="indicator-card text-center"><p class="text-sm text-gray-500">Markup Multiplicador</p><p class="text-2xl font-bold text-indigo-600">${markupMultiplicador.toFixed(2)}x</p></div>
                 </div>
+                <div class="mt-4 pt-4 border-t">
+                    <h4 class="font-semibold text-gray-800 mb-2">Desembolso de Caixa (Sinal)</h4>
+                    <div class="flex items-center gap-2 bg-gray-50 p-3 rounded-lg">
+                        <label for="sinalPercentual" class="text-sm whitespace-nowrap">Sugerir sinal de:</label>
+                        <input type="number" id="sinalPercentual" class="w-20 px-2 py-1 border border-gray-300 rounded-md" value="30" oninput="window.recalcularSinal()">
+                        <label for="sinalPercentual" class="text-sm">% do Custo Efetivo</label>
+                    </div>
+                    <div id="valorSinalContainer" class="mt-2">
+                        <!-- Result will be injected here by JS -->
+                    </div>
+                </div>
             `;
             
             lastCalcState = { precoVendaFinal, custoTotalDireto, totalPercentuaisVariaveis, lucroLiquidoFinal, valorTaxaPagamento, valorImpostos };
@@ -1291,6 +1325,7 @@
             document.getElementById('resultadoParcelamento').innerHTML = '';
             document.getElementById('numParcelasInput').value = '';
             document.getElementById('taxaParcelamentoInput').value = '';
+            recalcularSinal();
         }
         
         function usarUltimoPreco() {
@@ -1843,6 +1878,7 @@
             window.changeCalcMode = changeCalcMode;
             window.changeSubCalcMode = changeSubCalcMode;
             window.analiseFinanceira = analiseFinanceira;
+            window.recalcularSinal = recalcularSinal;
             window.usarUltimoPreco = usarUltimoPreco;
             window.calcularRoi = calcularRoi;
             window.calcularTco = calcularTco;
