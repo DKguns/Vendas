@@ -224,6 +224,7 @@
                 <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
                     <button onclick="window.changeTab(event, 'lucratividade')" class="tab-button active text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-calculator"></i>Calculadoras</button>
                     <button onclick="window.changeTab(event, 'funil')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-funnel"></i>Funil de Vendas</button>
+                    <button onclick="window.changeTab(event, 'vendas')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-chart-bar"></i>Vendas da Equipe</button>
                     <button onclick="window.changeTab(event, 'plano-acao')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-list-checks"></i>Plano de Ação</button>
                     <button onclick="window.changeTab(event, 'concorrencia')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-users-three"></i>Concorrência</button>
                     <button onclick="window.changeTab(event, 'estrategias')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-strategy"></i>Estratégias e Scripts</button>
@@ -247,11 +248,11 @@
 
                             <!-- MODO PRODUTO ÚNICO / KIT -->
                             <div id="modoLucratividade">
-                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+                                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
                                     <h4 class="font-bold text-blue-800">Para que serve?</h4>
                                     <p class="text-sm text-blue-700 mt-1">Use esta calculadora para definir o preço de venda de um produto ou proposta (kit) garantindo sua margem de lucro, ou para analisar a lucratividade de um preço já definido. Ideal para o planejamento interno.</p>
                                 </div>
-                            <div class="flex items-center justify-center gap-2 mb-6 bg-gray-200 p-1 rounded-lg w-full md:w-2/3 mx-auto">
+                                <div class="flex items-center justify-center gap-2 mb-6 bg-gray-200 p-1 rounded-lg w-full md:w-2/3 mx-auto">
                                     <button id="btnProdutoUnico" onclick="window.changeSubCalcMode('unico')" class="calc-mode-btn active">Produto Único</button>
                                     <button id="btnKit" onclick="window.changeSubCalcMode('kit')" class="calc-mode-btn">Proposta (Kit)</button>
                                 </div>
@@ -502,18 +503,65 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Vendas da Equipe -->
+                <div id="vendas" class="tab-content">
+                    <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg space-y-8">
+                        <!-- Meta da Equipe -->
+                        <div>
+                            <h2 class="text-3xl font-bold mb-2">Desempenho da Equipe</h2>
+                            <p class="text-gray-600 mb-6">Acompanhe a meta de vendas geral e os últimos negócios fechados por toda a equipe.</p>
+                            <div class="bg-white p-4 rounded-lg shadow-md border">
+                                <label for="teamMetaInput" class="block text-sm font-medium text-gray-700">Defina a Meta Geral da Equipe (R$)</label>
+                                <input type="text" id="teamMetaInput" class="mt-1 w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded-md" placeholder="Ex: 250000" oninput="window.formatInputCurrency(this); window.debounceSaveTeamGoal();">
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-base font-medium text-blue-700">Progresso da Meta da Equipe</span>
+                                        <span id="teamGoalPercentage" class="text-sm font-medium text-blue-700">0%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-4">
+                                        <div id="teamGoalProgressBar" class="bg-blue-600 h-4 rounded-full" style="width: 0%"></div>
+                                    </div>
+                                    <p id="teamGoalRemaining" class="text-sm text-gray-600 text-right mt-2"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lista de Vendas Ganhas -->
+                        <div>
+                            <h2 class="text-3xl font-bold mb-2">Últimas Vendas Ganhas</h2>
+                             <div class="mt-4 overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Negócio</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendedor</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="wonDealsList" class="divide-y divide-gray-200">
+                                        <!-- Linhas serão inseridas dinamicamente aqui -->
+                                        <tr><td colspan="4" class="p-6 text-center text-gray-500">Nenhuma venda ganha ainda.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                  <!-- Plano de Ação -->
                 <div id="plano-acao" class="tab-content">
                      <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
-                        <h2 class="text-3xl font-bold mb-2">Plano de Ação e Tarefas</h2>
-                        <p class="text-gray-600 mb-6">Organize suas atividades e próximos passos. Suas tarefas são salvas automaticamente.</p>
-                        <div class="flex flex-col md:flex-row gap-4 mb-6 border-b pb-6">
-                            <input type="text" id="newTaskInput" class="flex-grow px-4 py-2 border border-gray-300 rounded-lg shadow-sm" placeholder="Adicionar nova tarefa (Ex: Ligar para o cliente X)">
-                            <button onclick="window.addTask()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"><i class="ph-bold ph-plus-circle"></i> Adicionar Tarefa</button>
-                        </div>
-                        <div id="taskListContainer" class="space-y-3">
-                            <!-- Tarefas serão inseridas aqui -->
-                        </div>
+                         <h2 class="text-3xl font-bold mb-2">Plano de Ação e Tarefas</h2>
+                         <p class="text-gray-600 mb-6">Organize suas atividades e próximos passos. Suas tarefas são salvas automaticamente.</p>
+                         <div class="flex flex-col md:flex-row gap-4 mb-6 border-b pb-6">
+                             <input type="text" id="newTaskInput" class="flex-grow px-4 py-2 border border-gray-300 rounded-lg shadow-sm" placeholder="Adicionar nova tarefa (Ex: Ligar para o cliente X)">
+                             <button onclick="window.addTask()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"><i class="ph-bold ph-plus-circle"></i> Adicionar Tarefa</button>
+                         </div>
+                         <div id="taskListContainer" class="space-y-3">
+                             <!-- Tarefas serão inseridas aqui -->
+                         </div>
                     </div>
                 </div>
 
@@ -597,7 +645,7 @@
                             <h2 class="text-3xl font-bold mb-2">Guia de Quebra de Objeções</h2>
                             <p class="text-gray-600 mb-6">Use estes roteiros para transformar um "não" em uma oportunidade.</p>
                             <div class="space-y-4">
-                            <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group border">
+                                <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group border">
                                     <summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">"Está muito caro."</summary>
                                     <div class="mt-3 pt-3 border-t text-gray-700 space-y-2">
                                         <p><strong>1. Valide e Empatize:</strong> "Eu entendo sua preocupação com o investimento, [Nome do Cliente]. É fundamental que cada real investido traga o máximo de retorno."</p>
@@ -662,8 +710,26 @@
         // Importa as funções do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, setDoc, collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
+        // --- Variáveis Globais de Estado e Firebase ---
+        let app, auth, db, appId, userId;
+        let draggedCard = null;
+        let lastCalcState = {};
+        let currentCalcMode = 'lucratividade';
+        let currentSubCalcMode = 'unico';
+        window.cardIdCounter = 0; 
+        let kanbanUnsubscribe = () => {};
+        let notesUnsubscribe = () => {};
+        let goalUnsubscribe = () => {};
+        let taskUnsubscribe = () => {};
+        let teamGoalUnsubscribe = () => {};
+        let wonDealsUnsubscribe = () => {};
+        let saveNotesTimeout;
+        let saveGoalTimeout;
+        let saveTeamGoalTimeout;
+        let authReady = false;
+
         // --- Configuração do Firebase ---
         const firebaseConfig = {
             apiKey: "AIzaSyBe9yjpAUXzNyCWZie2bbHd69D5uqDVqhM",
@@ -674,23 +740,11 @@
             appId: "1:623306912799:web:8cebe639870d79476e912a",
             measurementId: "G-JNJMYVRRRV"
         };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        appId = typeof __app_id !== 'undefined' ? __app_id : 'vendasjd-7eaee';
 
-        // --- Variáveis Globais de Estado ---
-        let draggedCard = null;
-        let lastCalcState = {};
-        let currentCalcMode = 'lucratividade';
-        let currentSubCalcMode = 'unico';
-        window.cardIdCounter = 0; 
-        let userId = null;
-        let kanbanUnsubscribe = () => {};
-        let notesUnsubscribe = () => {};
-        let goalUnsubscribe = () => {};
-        let taskUnsubscribe = () => {};
-        let saveNotesTimeout;
-        let saveGoalTimeout;
 
         // --- Funções de Lógica do Firebase (autenticação) ---
         function handleLogin() {
@@ -738,6 +792,7 @@
         }
 
         function formatInputCurrency(input) {
+            if (!input) return;
             let value = input.value.replace(/\D/g, '');
             value = (value / 100).toFixed(2) + '';
             value = value.replace(".", ",");
@@ -784,9 +839,13 @@
              // Limpa as anotações
             const noteIds = ['concorrente1_nome', 'concorrente1_fortes', 'concorrente1_fracos', 'concorrente2_nome', 'concorrente2_fortes', 'concorrente2_fracos', 'concorrente3_nome', 'concorrente3_fortes', 'concorrente3_fracos', 'anotacoes_cliente'];
             noteIds.forEach(id => document.getElementById(id).value = '');
-            // Reseta a meta
+            // Reseta metas
             document.getElementById('metaInput').value = '';
+            document.getElementById('teamMetaInput').value = '';
             updateIndicators();
+            updateTeamGoalProgress(0,0);
+            // Limpa lista de vendas
+            document.getElementById('wonDealsList').innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-500">Nenhuma venda ganha ainda.</td></tr>';
         }
 
         // --- Funções de Lógica do Firebase (Firestore) ---
@@ -812,7 +871,7 @@
                 });
                 boardState.columns[columnId] = cards;
             });
-            const kanbanDocRef = doc(db, `users/${userId}/kanban/boardState`);
+            const kanbanDocRef = doc(db, `artifacts/${appId}/users/${userId}/kanban`, 'boardState');
             try {
                 await setDoc(kanbanDocRef, { board: JSON.stringify(boardState) });
                 updateStatus('Salvo', 'text-green-600', false);
@@ -880,7 +939,7 @@
                 concorrente3_fracos: document.getElementById('concorrente3_fracos').value,
                 anotacoes_cliente: document.getElementById('anotacoes_cliente').value
             };
-            const notesDocRef = doc(db, `users/${userId}/notes/allNotes`);
+            const notesDocRef = doc(db, `artifacts/${appId}/users/${userId}/notes`, 'allNotes');
             try {
                 await setDoc(notesDocRef, notes);
                 updateStatus('Salvo', 'text-green-600', false);
@@ -914,7 +973,7 @@
             if (!userId) return;
             updateStatus('A salvar meta...', 'text-yellow-600');
             const metaValue = parseCurrency(document.getElementById('metaInput').value);
-            const goalDocRef = doc(db, `users/${userId}/settings/goal`);
+            const goalDocRef = doc(db, `artifacts/${appId}/users/${userId}/settings`, 'goal');
             try {
                 await setDoc(goalDocRef, { value: metaValue });
                 updateStatus('Salvo', 'text-green-600', false);
@@ -947,7 +1006,7 @@
                     completed: taskEl.classList.contains('completed')
                 });
             });
-            const tasksDocRef = doc(db, `users/${userId}/tasks/taskList`);
+            const tasksDocRef = doc(db, `artifacts/${appId}/users/${userId}/tasks`, 'taskList');
             try {
                 await setDoc(tasksDocRef, { tasks });
                  updateStatus('Salvo', 'text-green-600', false);
@@ -1039,7 +1098,12 @@
             const icms = parseFloat(icmsInput.value) || 0;
 
             if (!nome || custo <= 0) {
-                alert('Por favor, preencha o nome e um custo válido para o item.');
+                // Substituindo alert por uma UI mais amigável
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'text-red-500 text-center text-sm my-2';
+                errorDiv.textContent = 'Por favor, preencha o nome e um custo válido.';
+                nomeInput.parentElement.parentElement.appendChild(errorDiv);
+                setTimeout(() => errorDiv.remove(), 3000);
                 return;
             }
 
@@ -1084,20 +1148,6 @@
             document.getElementById('custoTotalKit').textContent = formatCurrency(custoTotal);
         }
         
-        function preencherExemplo() {
-            changeCalcMode('lucratividade');
-            changeSubCalcMode('unico');
-            document.getElementById('custoProduto').value = 80;
-            document.getElementById('frete').value = 15;
-            document.getElementById('impostosUnico').value = 12;
-            document.getElementById('taxaPagamentoUnico').value = 4;
-            document.getElementById('comissaoUnico').value = 5;
-            document.getElementById('custoFixoUnico').value = 0;
-            document.getElementById('margemLucro').value = 25;
-            document.getElementById('precoVenda').value = ''; 
-            analiseFinanceira('precificar');
-        }
-
         function analiseFinanceira(modo) {
             let custoTotalDireto = 0;
             let custoProduto = 0;
@@ -1171,7 +1221,7 @@
             const valorTaxaPagamento = precoVendaFinal * (percTaxaPagamento / 100);
             const valorComissao = precoVendaFinal * (percComissao / 100);
             const valorCustoFixo = precoVendaFinal * (percCustoFixo / 100);
-            const lucroLiquidoFinal = precoVendaFinal - custoTotalDireto - (valorImpostos + valorTaxaPagamento + valorComissao + valorCustoFixo);
+            const lucroLiquidoFinal = precoVendaFinal - custoTotalDireto - valorImpostos - valorTaxaPagamento - valorComissao - valorCustoFixo;
             const totalCustosDespesas = custoTotalDireto + valorImpostos + valorTaxaPagamento + valorComissao + valorCustoFixo;
             const markupMultiplicador = (custoProduto > 0) ? precoVendaFinal / custoProduto : 0;
             const percCustoProduto = (precoVendaFinal > 0) ? (custoTotalDireto / precoVendaFinal) * 100 : 0;
@@ -1227,7 +1277,11 @@
             if (lastCalcState.precoVendaFinal) {
                 document.getElementById('roiInvestimento').value = lastCalcState.precoVendaFinal.toFixed(2);
             } else {
-                alert('Primeiro, calcule um preço na aba de Lucratividade para usar esta função.');
+                 const errorDiv = document.createElement('div');
+                errorDiv.className = 'text-red-500 text-center text-sm my-2';
+                errorDiv.textContent = 'Primeiro, calcule um preço na aba de Lucratividade.';
+                document.getElementById('calcModoRoi').appendChild(errorDiv);
+                setTimeout(() => errorDiv.remove(), 3000);
             }
         }
 
@@ -1339,9 +1393,11 @@
             }
 
             const novoPrecoVenda = precoVendaFinal * (1 - (descontoPerc / 100));
-            const valorDespesasVariaveis = novoPrecoVenda * (totalPercentuaisVariaveis / 100);
-            const novoLucroLiquido = novoPrecoVenda - custoTotalDireto - valorDespesasVariaveis;
+            // Recalcular despesas com base no novo preço
+            const novasDespesasVariaveis = novoPrecoVenda * (totalPercentuaisVariaveis / 100);
+            const novoLucroLiquido = novoPrecoVenda - custoTotalDireto - novasDespesasVariaveis;
             const novaMargem = (novoPrecoVenda > 0) ? (novoLucroLiquido / novoPrecoVenda) * 100 : 0;
+
 
             resDiv.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 text-center">
@@ -1570,7 +1626,7 @@
             });
 
             const totalDeals = wonCount + lostCount + activeCount;
-            const conversionRate = totalDeals > 0 ? (wonCount / (totalDeals - lostCount)) * 100 : 0;
+            const conversionRate = (wonCount + activeCount) > 0 ? (wonCount / (wonCount + activeCount)) * 100 : 0;
             const averageTicket = wonCount > 0 ? totalWon / wonCount : 0;
 
             document.getElementById('active-value').textContent = formatCurrency(activeValue);
@@ -1627,123 +1683,232 @@
             saveTasksState();
         }
 
-        // --- Event Listeners Globais e Inicialização ---
-        
-        window.changeTab = changeTab;
-        window.changeCalcMode = changeCalcMode;
-        window.changeSubCalcMode = changeSubCalcMode;
-        window.adicionarItemKit = adicionarItemKit;
-        window.atualizarCustoTotalKit = atualizarCustoTotalKit;
-        window.preencherExemplo = preencherExemplo;
-        window.analiseFinanceira = analiseFinanceira;
-        window.usarUltimoPreco = usarUltimoPreco;
-        window.calcularRoi = calcularRoi;
-        window.calcularTco = calcularTco;
-        window.simularDesconto = simularDesconto;
-        window.calcularDescontoMaximo = calcularDescontoMaximo;
-        window.calcularParcelamento = calcularParcelamento;
-        window.gerarPlanoAcao = gerarPlanoAcao;
-        window.addCard = addCard;
-        window.updateIndicators = updateIndicators;
-        window.saveKanbanState = saveKanbanState;
-        window.debounceSaveNotes = debounceSaveNotes;
-        window.debounceSaveGoal = debounceSaveGoal;
-        window.formatInputCurrency = formatInputCurrency;
-        window.parseCurrency = parseCurrency;
-        window.addTask = addTask;
-        window.deleteTask = deleteTask;
-        window.toggleTaskCompletion = toggleTaskCompletion;
-        
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                resetUIState();
-                userId = user.uid;
-                document.getElementById('authOverlay').classList.add('hidden');
-                document.getElementById('appContent').classList.remove('hidden');
-                document.getElementById('userEmailDisplay').textContent = user.email;
-                document.getElementById('userSection').classList.remove('hidden');
-                updateStatus('Conectado', 'text-blue-600');
+        // --- Funções da Aba Vendas da Equipe ---
+        function debounceSaveTeamGoal() {
+            clearTimeout(saveTeamGoalTimeout);
+            saveTeamGoalTimeout = setTimeout(saveTeamGoalState, 1500);
+        }
 
-                kanbanUnsubscribe();
-                const kanbanDocRef = doc(db, `users/${userId}/kanban/boardState`);
-                kanbanUnsubscribe = onSnapshot(kanbanDocRef, (docSnap) => {
-                    loadKanbanState(docSnap.data());
-                    updateStatus('Funil sincronizado', 'text-green-600', false);
-                });
-
-                notesUnsubscribe();
-                const notesDocRef = doc(db, `users/${userId}/notes/allNotes`);
-                notesUnsubscribe = onSnapshot(notesDocRef, (docSnap) => {
-                    loadNotesState(docSnap.data());
-                     updateStatus('Anotações sincronizadas', 'text-green-600', false);
-                });
-                
-                goalUnsubscribe();
-                const goalDocRef = doc(db, `users/${userId}/settings/goal`);
-                goalUnsubscribe = onSnapshot(goalDocRef, (docSnap) => {
-                    loadGoalState(docSnap.data());
-                });
-
-                taskUnsubscribe();
-                const tasksDocRef = doc(db, `users/${userId}/tasks/taskList`);
-                taskUnsubscribe = onSnapshot(tasksDocRef, (docSnap) => {
-                    loadTasksState(docSnap.data());
-                });
-
-            } else {
-                userId = null;
-                document.getElementById('authOverlay').classList.remove('hidden');
-                document.getElementById('appContent').classList.add('hidden');
-                kanbanUnsubscribe();
-                notesUnsubscribe();
-                goalUnsubscribe();
-                taskUnsubscribe();
-                resetUIState();
+        async function saveTeamGoalState() {
+            if (!userId) return;
+            updateStatus('Salvando meta da equipe...', 'text-yellow-600');
+            const metaValue = parseCurrency(document.getElementById('teamMetaInput').value);
+            const teamGoalDocRef = doc(db, `artifacts/${appId}/public/data/settings`, 'teamGoal');
+            try {
+                await setDoc(teamGoalDocRef, { value: metaValue });
+                updateStatus('Salvo', 'text-green-600', false);
+            } catch (error) {
+                console.error("Erro ao salvar meta da equipe:", error);
+                updateStatus('Erro ao salvar', 'text-red-600', false);
             }
-        });
+        }
+
+        function loadTeamGoalState(data) {
+            const teamGoalInput = document.getElementById('teamMetaInput');
+            if (data && typeof data.value !== 'undefined') {
+                teamGoalInput.value = formatCurrency(data.value);
+            }
+            // A atualização da barra de progresso será acionada por loadWonDeals
+        }
         
+        function updateTeamGoalProgress(totalWon, teamGoal) {
+            const goalValue = teamGoal || 0;
+            const progressBar = document.getElementById('teamGoalProgressBar');
+            const percentageText = document.getElementById('teamGoalPercentage');
+            const remainingText = document.getElementById('teamGoalRemaining');
+
+            if (goalValue > 0) {
+                const percentage = Math.min((totalWon / goalValue) * 100, 100);
+                progressBar.style.width = `${percentage}%`;
+                percentageText.textContent = `${percentage.toFixed(0)}%`;
+                const remaining = goalValue - totalWon;
+                remainingText.textContent = remaining > 0 ? `Faltam ${formatCurrency(remaining)}` : 'Meta da equipe atingida!';
+            } else {
+                progressBar.style.width = '0%';
+                percentageText.textContent = '0%';
+                remainingText.textContent = 'Defina uma meta para a equipe.';
+            }
+        }
+
+        function loadWonDeals(deals) {
+            const listBody = document.getElementById('wonDealsList');
+            listBody.innerHTML = '';
+            let totalWonValue = 0;
+
+            if (deals.length === 0) {
+                listBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-500">Nenhuma venda ganha ainda.</td></tr>';
+            } else {
+                deals.forEach(deal => {
+                    const row = document.createElement('tr');
+                    const dealDate = deal.wonAt?.toDate ? deal.wonAt.toDate() : new Date();
+                    const sellerName = (deal.sellerEmail && typeof deal.sellerEmail === 'string') ? deal.sellerEmail.split('@')[0] : 'Desconhecido';
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${deal.title}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">${formatCurrency(deal.value)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${sellerName}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dealDate.toLocaleDateString('pt-BR')}</td>
+                    `;
+                    listBody.appendChild(row);
+                    totalWonValue += deal.value;
+                });
+            }
+            const teamGoal = parseCurrency(document.getElementById('teamMetaInput').value);
+            updateTeamGoalProgress(totalWonValue, teamGoal);
+        }
+
+        async function addWonDeal(card) {
+             if (!userId || !auth.currentUser) return;
+            const dealData = {
+                title: card.querySelector('.card-title-input').value,
+                value: parseCurrency(card.querySelector('.card-value-input').value),
+                sellerId: userId,
+                sellerEmail: auth.currentUser.email || `anon-${userId.substring(0,6)}`,
+                wonAt: serverTimestamp()
+            };
+            try {
+                const wonDealsCol = collection(db, `artifacts/${appId}/public/data/wonDeals`);
+                await addDoc(wonDealsCol, dealData);
+            } catch (error) {
+                console.error("Erro ao adicionar venda ganha:", error);
+            }
+        }
+
+        // --- Inicialização da Aplicação ---
         document.addEventListener('DOMContentLoaded', () => {
+            
+            window.changeTab = changeTab;
+            window.changeCalcMode = changeCalcMode;
+            window.changeSubCalcMode = changeSubCalcMode;
+            window.analiseFinanceira = analiseFinanceira;
+            window.usarUltimoPreco = usarUltimoPreco;
+            window.calcularRoi = calcularRoi;
+            window.calcularTco = calcularTco;
+            window.simularDesconto = simularDesconto;
+            window.calcularDescontoMaximo = calcularDescontoMaximo;
+            window.calcularParcelamento = calcularParcelamento;
+            window.gerarPlanoAcao = gerarPlanoAcao;
+            window.addCard = addCard;
+            window.saveKanbanState = saveKanbanState;
+            window.updateIndicators = updateIndicators;
+            window.debounceSaveNotes = debounceSaveNotes;
+            window.debounceSaveGoal = debounceSaveGoal;
+            window.debounceSaveTeamGoal = debounceSaveTeamGoal;
+            window.adicionarItemKit = adicionarItemKit;
+            window.atualizarCustoTotalKit = atualizarCustoTotalKit;
+            window.addTask = addTask;
+            window.deleteTask = deleteTask;
+            window.toggleTaskCompletion = toggleTaskCompletion;
+            window.formatInputCurrency = formatInputCurrency;
+
+             // Lógica de autenticação
             document.getElementById('loginButton').addEventListener('click', handleLogin);
             document.getElementById('registerButton').addEventListener('click', handleRegister);
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
             document.getElementById('showRegister').addEventListener('click', toggleAuthForms);
             document.getElementById('showLogin').addEventListener('click', toggleAuthForms);
 
-            changeCalcMode('lucratividade'); 
-            changeSubCalcMode('unico');
-            const quemPagaContainer = document.getElementById('quemPagaTaxaContainer');
-            quemPagaContainer.addEventListener('click', (e) => {
-                if (e.target.classList.contains('quem-paga-btn')) {
-                    quemPagaContainer.querySelectorAll('.quem-paga-btn').forEach(btn => btn.classList.remove('active'));
+            // Lógica Kanban Drag & Drop
+            const columns = document.querySelectorAll('.kanban-column');
+            columns.forEach(column => {
+                column.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    const cardsContainer = column.querySelector('.kanban-cards');
+                    cardsContainer.classList.add('drag-over');
+                });
+                column.addEventListener('dragleave', () => {
+                     const cardsContainer = column.querySelector('.kanban-cards');
+                     cardsContainer.classList.remove('drag-over');
+                });
+                column.addEventListener('drop', async () => {
+                    const cardsContainer = column.querySelector('.kanban-cards');
+                    cardsContainer.classList.remove('drag-over');
+                    if (draggedCard) {
+                        cardsContainer.appendChild(draggedCard);
+                        
+                        const newStage = column.dataset.column;
+                        let stageHistory = JSON.parse(draggedCard.dataset.stageHistory || '[]');
+                        stageHistory.push({ stage: newStage, movedAt: new Date().toISOString() });
+                        draggedCard.dataset.stageHistory = JSON.stringify(stageHistory);
+                        
+                        // Se o card foi movido para "Ganho", registra a venda
+                        if (newStage === 'won') {
+                           await addWonDeal(draggedCard);
+                        }
+
+                        updateIndicators();
+                        saveKanbanState();
+                    }
+                });
+            });
+
+             // Lógica Simulador Parcelamento
+            document.getElementById('quemPagaTaxaContainer').addEventListener('click', (e) => {
+                if(e.target.tagName === 'BUTTON') {
+                    document.querySelectorAll('.quem-paga-btn').forEach(btn => btn.classList.remove('active'));
                     e.target.classList.add('active');
                 }
             });
-            
-             document.querySelectorAll('.kanban-cards').forEach(column => {
-                column.addEventListener('dragover', e => { e.preventDefault(); 
-                    const container = e.currentTarget;
-                    container.classList.add('drag-over');
-                });
-                column.addEventListener('dragleave', e => { 
-                    e.currentTarget.classList.remove('drag-over');
-                });
-                column.addEventListener('drop', e => { 
-                    e.preventDefault(); 
-                    const container = e.currentTarget;
-                    const columnId = container.closest('.kanban-column').dataset.column;
-                    if (draggedCard && container.contains(draggedCard) === false) { 
-                        container.appendChild(draggedCard);
-                        let stageHistory = JSON.parse(draggedCard.dataset.stageHistory);
-                        stageHistory.push({ stage: columnId, movedAt: new Date().toISOString() });
-                        draggedCard.dataset.stageHistory = JSON.stringify(stageHistory);
-                        updateIndicators();
-                        saveKanbanState();
-                    } 
-                    container.classList.remove('drag-over'); 
-                });
+
+            // Define o listener de autenticação
+            onAuthStateChanged(auth, user => {
+                const authOverlay = document.getElementById('authOverlay');
+                const appContent = document.getElementById('appContent');
+                const userSection = document.getElementById('userSection');
+
+                // Limpa todos os listeners para evitar duplicação
+                kanbanUnsubscribe();
+                notesUnsubscribe();
+                goalUnsubscribe();
+                taskUnsubscribe();
+                teamGoalUnsubscribe();
+                wonDealsUnsubscribe();
+
+                if (user) {
+                    userId = user.uid;
+                    authOverlay.classList.add('hidden');
+                    appContent.classList.remove('hidden');
+                    userSection.classList.remove('hidden');
+                    document.getElementById('userEmailDisplay').textContent = user.email || `Vendedor ${user.uid.substring(0,6)}`;
+
+                    // Listeners de dados do usuário (privados)
+                    const kanbanDocRef = doc(db, `artifacts/${appId}/users/${userId}/kanban`, 'boardState');
+                    kanbanUnsubscribe = onSnapshot(kanbanDocRef, (doc) => loadKanbanState(doc.data()));
+
+                    const notesDocRef = doc(db, `artifacts/${appId}/users/${userId}/notes`, 'allNotes');
+                    notesUnsubscribe = onSnapshot(notesDocRef, (doc) => loadNotesState(doc.data()));
+                    
+                    const goalDocRef = doc(db, `artifacts/${appId}/users/${userId}/settings`, 'goal');
+                    goalUnsubscribe = onSnapshot(goalDocRef, (doc) => loadGoalState(doc.data()));
+                    
+                    const tasksDocRef = doc(db, `artifacts/${appId}/users/${userId}/tasks`, 'taskList');
+                    taskUnsubscribe = onSnapshot(tasksDocRef, (doc) => loadTasksState(doc.data()));
+
+                    // Listeners de dados públicos/da equipe
+                    const teamGoalDocRef = doc(db, `artifacts/${appId}/public/data/settings`, 'teamGoal');
+                    teamGoalUnsubscribe = onSnapshot(teamGoalDocRef, (doc) => loadTeamGoalState(doc.data()));
+
+                    const wonDealsCol = collection(db, `artifacts/${appId}/public/data/wonDeals`);
+                    const q = query(wonDealsCol, orderBy('wonAt', 'desc'), limit(50));
+                    wonDealsUnsubscribe = onSnapshot(q, (querySnapshot) => {
+                        const deals = [];
+                        querySnapshot.forEach((doc) => {
+                            deals.push(doc.data());
+                        });
+                        loadWonDeals(deals);
+                    }, (error) => {
+                        console.error("Erro ao carregar vendas ganhas:", error);
+                        document.getElementById('wonDealsList').innerHTML = '<tr><td colspan="4" class="p-6 text-center text-red-500">Erro ao carregar dados. Verifique as permissões do Firestore.</td></tr>';
+                    });
+
+                } else {
+                    userId = null;
+                    authOverlay.classList.remove('hidden');
+                    appContent.classList.add('hidden');
+                    userSection.classList.add('hidden');
+                    resetUIState();
+                }
             });
         });
-
     </script>
 </body>
 </html>
