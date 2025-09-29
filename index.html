@@ -153,316 +153,803 @@
             visibility: visible;
             opacity: 1;
         }
+        .quem-paga-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            font-weight: 500;
+        }
+        .quem-paga-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        .calc-mode-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+        }
+        .calc-mode-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details > summary::after { content: '+'; float: right; font-size: 1.5rem; font-weight: bold; }
+        details[open] > summary::after { content: '−'; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-    <div class="container mx-auto p-4 md:p-8 max-w-screen-2xl">
-        <header class="text-center mb-10">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Caixa de Ferramentas do Vendedor</h1>
-            <p class="text-lg text-gray-600 mt-2">Suas ferramentas essenciais para vender mais e melhor.</p>
-        </header>
-
-        <div class="mb-8 border-b border-gray-200">
-            <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
-                <button onclick="changeTab(event, 'lucratividade')" class="tab-button active text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-calculator"></i>Calculadoras</button>
-                <button onclick="changeTab(event, 'script')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-scroll"></i>Gerador de Script</button>
-                <button onclick="changeTab(event, 'funil')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-funnel"></i>Funil de Vendas</button>
-                <button onclick="changeTab(event, 'concorrencia')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-users-three"></i>Concorrência</button>
-                <button onclick="changeTab(event, 'estrategias')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-strategy"></i>Estratégias</button>
-            </nav>
+    <!-- Auth Overlay -->
+    <div id="authOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-sm">
+            <!-- Login Form -->
+            <div id="loginForm">
+                <h2 class="text-2xl font-bold text-center mb-6">Entrar na Ferramenta</h2>
+                <div id="loginError" class="text-red-500 text-sm mb-4 text-center"></div>
+                <div class="space-y-4">
+                    <div>
+                        <label for="loginEmail" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="loginEmail" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="loginPassword" class="block text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="loginPassword" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <button id="loginButton" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Entrar
+                    </button>
+                </div>
+                <p class="mt-4 text-center text-sm">
+                    Não tem uma conta? <a href="#" id="showRegister" class="font-medium text-blue-600 hover:text-blue-500">Crie uma aqui</a>
+                </p>
+            </div>
+            <!-- Register Form -->
+            <div id="registerForm" class="hidden">
+                 <h2 class="text-2xl font-bold text-center mb-6">Criar Conta</h2>
+                 <div id="registerError" class="text-red-500 text-sm mb-4 text-center"></div>
+                <div class="space-y-4">
+                    <div>
+                        <label for="registerEmail" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="registerEmail" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="registerPassword" class="block text-sm font-medium text-gray-700">Senha (mínimo 6 caracteres)</label>
+                        <input type="password" id="registerPassword" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <button id="registerButton" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                        Criar Conta
+                    </button>
+                </div>
+                 <p class="mt-4 text-center text-sm">
+                    Já tem uma conta? <a href="#" id="showLogin" class="font-medium text-blue-600 hover:text-blue-500">Entre aqui</a>
+                </p>
+            </div>
         </div>
-
-        <main>
-            <!-- Calculadoras -->
-            <div id="lucratividade" class="tab-content active">
-                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                    <!-- Nova Calculadora Financeira -->
-                    <div class="bg-white p-6 md:p-8 rounded-lg shadow-md lg:col-span-3">
-                        <h2 class="text-2xl font-bold mb-1">Análise Financeira da Venda</h2>
-                        <p class="text-gray-600 mb-6">Uma ferramenta completa para analisar e precificar suas vendas com precisão.</p>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                            <!-- Coluna 1: Custos -->
-                            <div class="space-y-4">
-                                <h3 class="font-semibold text-lg border-b pb-2">1. Custos Diretos</h3>
-                                <div><label for="custoProduto" class="block text-sm font-medium text-gray-700 tooltip-container">Custo do Produto (R$) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Valor pago ao fornecedor pela mercadoria que está sendo vendida.</span></label><input type="number" id="custoProduto" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="100.00"></div>
-                                <div><label for="frete" class="block text-sm font-medium text-gray-700 tooltip-container">Frete (R$) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Custo de transporte para entregar o produto ao cliente, caso seja pago pela sua empresa.</span></label><input type="number" id="frete" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="25.00"></div>
-                            </div>
-
-                             <!-- Coluna 2: Despesas -->
-                            <div class="space-y-4">
-                                <h3 class="font-semibold text-lg border-b pb-2">2. Despesas Variáveis</h3>
-                                <div><label for="impostos" class="block text-sm font-medium text-gray-700 tooltip-container">Impostos (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual total de impostos que incidem sobre o preço da venda (Ex: ICMS, PIS, COFINS).</span></label><input type="number" id="impostos" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="10"></div>
-                                <div><label for="taxaPagamento" class="block text-sm font-medium text-gray-700 tooltip-container">Taxa de Pagamento (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual da taxa da maquininha de cartão, gateway de pagamento ou boleto.</span></label><input type="number" id="taxaPagamento" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="4.5"></div>
-                                <div><label for="comissao" class="block text-sm font-medium text-gray-700 tooltip-container">Comissão (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual de comissão a ser pago ao vendedor sobre o preço da venda.</span></label><input type="number" id="comissao" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="5"></div>
-                                <div><label for="custoFixo" class="block text-sm font-medium text-gray-700 tooltip-container">Rateio Custo Fixo (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Opcional. Um percentual do preço da venda para ajudar a cobrir custos fixos da empresa (aluguel, salários, etc.).</span></label><input type="number" id="custoFixo" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="3"></div>
-                            </div>
-                        </div>
-
-                        <div class="mt-6 pt-6 border-t">
-                             <h3 class="font-semibold text-lg pb-2">3. Preço e Lucro</h3>
-                             <p class="text-sm text-gray-500 mb-4">Preencha <span class="font-bold">um</span> dos campos abaixo e clique no botão correspondente.</p>
-                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                                <div>
-                                    <label for="precoVenda" class="block text-sm font-medium text-gray-700">Preço de Venda Final (R$)</label>
-                                    <input type="number" id="precoVenda" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="250.00">
-                                    <button onclick="analiseFinanceira('analisar')" class="mt-2 w-full bg-emerald-600 text-white font-bold py-2 px-4 rounded-md hover:bg-emerald-700 transition">Analisar Venda</button>
-                                </div>
-                                <div>
-                                    <label for="margemLucro" class="block text-sm font-medium text-gray-700">Margem de Lucro Desejada (%)</label>
-                                    <input type="number" id="margemLucro" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="20">
-                                    <button onclick="analiseFinanceira('precificar')" class="mt-2 w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition">Calcular Preço</button>
-                                </div>
-                             </div>
-                        </div>
-                         <!-- Seção de Exemplo -->
-                        <div class="mt-6">
-                            <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group">
-                                <summary class="font-semibold text-gray-800 group-open:text-blue-700">Ver Exemplo de Cálculo</summary>
-                                <div class="mt-3 pt-3 border-t text-sm text-gray-700 space-y-2">
-                                    <p><strong>Cenário:</strong> Um produto custou <strong>R$ 80,00</strong> para a empresa. O frete para o cliente é de <strong>R$ 15,00</strong>. Os impostos somam <strong>12%</strong>, a taxa do cartão é <strong>4%</strong> e a comissão do vendedor é de <strong>5%</strong>. A empresa quer uma margem de lucro de <strong>25%</strong>.</p>
-                                    <p>Qual deve ser o preço de venda?</p>
-                                    <button onclick="preencherExemplo()" class="mt-2 bg-gray-200 text-gray-800 font-bold py-1 px-3 rounded-md hover:bg-gray-300 transition text-xs">Preencher com Exemplo</button>
-                                </div>
-                            </details>
-                        </div>
-                    </div>
-                     <!-- Coluna de Resultados -->
-                    <div class="bg-white p-6 md:p-8 rounded-lg shadow-md lg:col-span-2">
-                        <h2 class="text-2xl font-bold mb-1">Resultados da Análise</h2>
-                        <div id="resultadoAnalise" class="result-box mt-6">
-                            <p class="text-gray-500 text-center py-10">Preencha os campos e calcule para ver os resultados.</p>
-                        </div>
-                        <!-- Simulador de Negociação -->
-                        <div id="simuladorNegociacao" class="mt-6 hidden">
-                             <h2 class="text-2xl font-bold mb-1 border-t pt-6">Simulador de Negociação</h2>
-                             <p class="text-gray-600 mb-6">Teste cenários para tomar as melhores decisões.</p>
-
-                             <div class="space-y-6">
-                                <!-- Simular Desconto -->
-                                <div class="bg-gray-50 p-4 rounded-lg">
-                                    <h3 class="font-semibold text-lg">1. Qual o impacto de um desconto?</h3>
-                                    <div class="flex items-end gap-2 mt-2">
-                                        <div class="flex-grow">
-                                            <label for="simularDescontoInput" class="text-sm font-medium">Desconto (%)</label>
-                                            <input type="number" id="simularDescontoInput" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="10">
-                                        </div>
-                                        <button onclick="simularDesconto()" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 transition h-11">Simular</button>
-                                    </div>
-                                    <div id="resultadoSimularDesconto" class="mt-3"></div>
-                                </div>
-
-                                <!-- Calcular Desconto Máximo -->
-                                <div class="bg-gray-50 p-4 rounded-lg">
-                                    <h3 class="font-semibold text-lg">2. Qual o desconto máximo que posso dar?</h3>
-                                    <div class="flex items-end gap-2 mt-2">
-                                        <div class="flex-grow">
-                                            <label for="descontoMaximoInput" class="text-sm font-medium">Mantendo a margem mínima de (%)</label>
-                                            <input type="number" id="descontoMaximoInput" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="15">
-                                        </div>
-                                        <button onclick="calcularDescontoMaximo()" class="bg-rose-600 text-white font-bold py-2 px-4 rounded-md hover:bg-rose-700 transition h-11">Calcular</button>
-                                    </div>
-                                    <div id="resultadoDescontoMaximo" class="mt-3"></div>
-                                </div>
-                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Gerador de Script -->
-            <div id="script" class="tab-content">
-                <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
-                    <h2 class="text-2xl font-bold mb-1">Gerador de Script de Vendas</h2>
-                    <p class="text-gray-600 mb-6">Preencha os campos para criar um roteiro de abordagem inicial.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div><label for="scriptNomeCliente" class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente</label><input type="text" id="scriptNomeCliente" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: João Silva"></div>
-                        <div><label for="scriptNomeEmpresa" class="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa do Cliente</label><input type="text" id="scriptNomeEmpresa" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Silva & Filhos Ltda"></div>
-                        <div><label for="scriptProduto" class="block text-sm font-medium text-gray-700 mb-1">Seu Produto/Serviço</label><input type="text" id="scriptProduto" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Software de Gestão"></div>
-                        <div><label for="scriptDor" class="block text-sm font-medium text-gray-700 mb-1">Principal Dor que resolve</label><input type="text" id="scriptDor" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Otimizar o controle de estoque"></div>
-                    </div>
-                    <div class="mt-6"><button onclick="gerarScript()" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition">Gerar Script</button></div>
-                    <div id="resultadoScript" class="result-box mt-6 hidden whitespace-pre-wrap"></div>
-                </div>
-            </div>
-            
-            <!-- Funil de Vendas -->
-            <div id="funil" class="tab-content">
-                <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
-                    <h2 class="text-3xl font-bold mb-2">Funil de Vendas Pessoal</h2>
-                    <p class="text-gray-600 mb-6">Arraste os negócios entre as fases. Os dados não são salvos ao fechar a página.</p>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                        <div class="indicator-card flex items-start gap-4 p-5">
-                            <div class="bg-blue-100 text-blue-600 p-3 rounded-lg"><i class="ph-bold ph-chart-line-up text-2xl"></i></div>
-                            <div><p class="text-sm text-gray-500">Valor em Aberto</p><p id="active-value" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
-                        </div>
-                        <div class="indicator-card flex items-start gap-4 p-5">
-                            <div class="bg-indigo-100 text-indigo-600 p-3 rounded-lg"><i class="ph-bold ph-scales text-2xl"></i></div>
-                            <div><p class="text-sm text-gray-500">Forecast Ponderado</p><p id="weighted-value" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
-                        </div>
-                        <div class="indicator-card flex items-start gap-4 p-5">
-                            <div class="bg-amber-100 text-amber-600 p-3 rounded-lg"><i class="ph-bold ph-tag text-2xl"></i></div>
-                            <div><p class="text-sm text-gray-500">Ticket Médio (Ganho)</p><p id="average-ticket" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
-                        </div>
-                        <div class="indicator-card flex items-start gap-4 p-5">
-                            <div class="bg-emerald-100 text-emerald-600 p-3 rounded-lg"><i class="ph-bold ph-trophy text-2xl"></i></div>
-                            <div><p class="text-sm text-gray-500">Total Ganho</p><p id="won-value" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
-                        </div>
-                        <div class="indicator-card flex items-start gap-4 p-5">
-                            <div class="bg-slate-100 text-slate-600 p-3 rounded-lg"><i class="ph-bold ph-thumbs-down text-2xl"></i></div>
-                            <div><p class="text-sm text-gray-500">Total Perdido</p><p id="lost-value" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
-                        </div>
-                        <div class="indicator-card flex items-start gap-4 p-5">
-                            <div class="bg-rose-100 text-rose-600 p-3 rounded-lg"><i class="ph-bold ph-arrows-clockwise text-2xl"></i></div>
-                            <div><p class="text-sm text-gray-500">Taxa de Conversão</p><p id="conversion-rate" class="text-2xl font-bold text-gray-800">0%</p></div>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col md:flex-row gap-4 mb-6 border-b pb-6">
-                         <input type="text" id="newCardInput" class="flex-grow px-4 py-2 border border-gray-300 rounded-lg shadow-sm" placeholder="Nome do novo lead/negócio">
-                         <button onclick="addCard()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"><i class="ph-bold ph-plus-circle"></i> Adicionar</button>
-                    </div>
-                    <div class="kanban-board">
-                        <div class="kanban-column" data-column="prospect"><div class="kanban-column-header"><h3><i class="ph-fill ph-binoculars text-sky-500"></i> Prospectando</h3><div class="column-indicators" id="indicators-prospect"></div></div><div class="kanban-cards"></div></div>
-                        <div class="kanban-column" data-column="qualify"><div class="kanban-column-header"><h3><i class="ph-fill ph-lightbulb text-amber-500"></i> Qualificação</h3><div class="column-indicators" id="indicators-qualify"></div></div><div class="kanban-cards"></div></div>
-                        <div class="kanban-column" data-column="proposal"><div class="kanban-column-header"><h3><i class="ph-fill ph-file-text text-indigo-500"></i> Proposta</h3><div class="column-indicators" id="indicators-proposal"></div></div><div class="kanban-cards"></div></div>
-                        <div class="kanban-column" data-column="negotiate"><div class="kanban-column-header"><h3><i class="ph-fill ph-handshake text-rose-500"></i> Negociação</h3><div class="column-indicators" id="indicators-negotiate"></div></div><div class="kanban-cards"></div></div>
-                        <div class="kanban-column" data-column="won"><div class="kanban-column-header"><h3><i class="ph-fill ph-trophy text-emerald-500"></i> Ganho</h3><div class="column-indicators" id="indicators-won"></div></div><div class="kanban-cards"></div></div>
-                        <div class="kanban-column" data-column="lost"><div class="kanban-column-header"><h3><i class="ph-fill ph-x-circle text-slate-500"></i> Perdido</h3><div class="column-indicators" id="indicators-lost"></div></div><div class="kanban-cards"></div></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Análise de Concorrência -->
-            <div id="concorrencia" class="tab-content">
-                <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
-                     <h2 class="text-2xl font-bold mb-1">Análise de Concorrência</h2>
-                    <p class="text-gray-600 mb-6">Anote os pontos fortes e fracos dos seus principais concorrentes. As notas não ficam salvas.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="bg-gray-50 p-4 rounded-lg"><input type="text" placeholder="Nome do Concorrente 1" class="w-full font-bold text-lg mb-2 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500"><label class="font-semibold mt-4 block">Pontos Fortes:</label><textarea class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" placeholder="Ex: Preço agressivo..."></textarea><label class="font-semibold mt-4 block">Pontos Fracos:</label><textarea class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" placeholder="Ex: Suporte ao cliente..."></textarea></div>
-                        <div class="bg-gray-50 p-4 rounded-lg"><input type="text" placeholder="Nome do Concorrente 2" class="w-full font-bold text-lg mb-2 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500"><label class="font-semibold mt-4 block">Pontos Fortes:</label><textarea class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32"></textarea><label class="font-semibold mt-4 block">Pontos Fracos:</label><textarea class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32"></textarea></div>
-                        <div class="bg-gray-50 p-4 rounded-lg"><input type="text" placeholder="Nome do Concorrente 3" class="w-full font-bold text-lg mb-2 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500"><label class="font-semibold mt-4 block">Pontos Fortes:</label><textarea class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32"></textarea><label class="font-semibold mt-4 block">Pontos Fracos:</label><textarea class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32"></textarea></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Estratégias de Vendas -->
-            <div id="estrategias" class="tab-content">
-                 <div class="bg-white p-6 md:p-8 rounded-lg shadow-md space-y-10">
-                    <div>
-                        <h2 class="text-3xl font-bold mb-2">Decifrando Perfis de Cliente</h2>
-                        <p class="text-gray-600 mb-6">Adapte sua abordagem ao estilo de cada cliente para aumentar suas chances de sucesso.</p>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <!-- Lobo -->
-                            <div class="bg-sky-50 p-5 rounded-lg border border-sky-200">
-                                <h3 class="font-bold text-xl mb-3 flex items-center gap-2"><i class="ph-bold ph-chart-bar text-sky-600"></i>Lobo (Analítico)</h3>
-                                <p class="font-semibold">Como identificar:</p>
-                                <ul class="list-disc list-inside text-gray-700 mt-1 mb-3"><li>Focado em dados, fatos e lógica.</li><li>Faz muitas perguntas técnicas.</li><li>Cético, não gosta de "conversa fiada".</li></ul>
-                                <p class="font-semibold">Como vender:</p>
-                                <ul class="list-disc list-inside text-gray-700 mt-1"><li>Apresente planilhas, gráficos e estudos de caso.</li><li>Seja preciso, direto e não pressione.</li><li>Dê tempo para ele analisar e decidir.</li></ul>
-                            </div>
-                            <!-- Águia -->
-                            <div class="bg-rose-50 p-5 rounded-lg border border-rose-200">
-                                <h3 class="font-bold text-xl mb-3 flex items-center gap-2"><i class="ph-bold ph-rocket-launch text-rose-600"></i>Águia (Decidido)</h3>
-                                <p class="font-semibold">Como identificar:</p>
-                                <ul class="list-disc list-inside text-gray-700 mt-1 mb-3"><li>Focado em resultados, objetivos e poder.</li><li>Direto, assertivo, parece impaciente.</li><li>Quer saber o "resumo da ópera".</li></ul>
-                                <p class="font-semibold">Como vender:</p>
-                                <ul class="list-disc list-inside text-gray-700 mt-1"><li>Seja rápido e vá direto ao ponto.</li><li>Mostre como sua solução o fará atingir metas.</li><li>Apresente 2-3 opções para ele sentir o controle.</li></ul>
-                            </div>
-                             <!-- Gato -->
-                            <div class="bg-amber-50 p-5 rounded-lg border border-amber-200">
-                                <h3 class="font-bold text-xl mb-3 flex items-center gap-2"><i class="ph-bold ph-hands-clapping text-amber-600"></i>Gato (Relacional)</h3>
-                                <p class="font-semibold">Como identificar:</p>
-                                <ul class="list-disc list-inside text-gray-700 mt-1 mb-3"><li>Focado em pessoas, confiança e relacionamentos.</li><li>Amigável, bom ouvinte, evita conflitos.</li></ul>
-                                <p class="font-semibold">Como vender:</p>
-                                <ul class="list-disc list-inside text-gray-700 mt-1"><li>Crie rapport primeiro, converse sobre amenidades.</li><li>Use depoimentos de outros clientes felizes.</li><li>Dê garantias e segurança. Ele compra de quem confia.</li></ul>
-                            </div>
-                            <!-- Pavão -->
-                            <div class="bg-indigo-50 p-5 rounded-lg border border-indigo-200">
-                                <h3 class="font-bold text-xl mb-3 flex items-center gap-2"><i class="ph-bold ph-microphone text-indigo-600"></i>Pavão (Expressivo)</h3>
-                                <p class="font-semibold">Como identificar:</p>
-                                <ul class="list-disc list-inside text-gray-700 mt-1 mb-3"><li>Focado em reconhecimento, ideias e inovação.</li><li>Entusiasmado, criativo, falante, gosta de atenção.</li></ul>
-                                <p class="font-semibold">Como vender:</p>
-                                <ul class="list-disc list-inside text-gray-700 mt-1"><li>Mostre como sua solução é inovadora.</li><li>Deixe-o falar e elogie suas ideias e visão.</li><li>Use visuais impactantes e foque nos sonhos e possibilidades.</li></ul>
-                            </div>
-                        </div>
-                        <div class="mt-8">
-                             <label class="font-bold text-xl mb-3 block">Anotações sobre o cliente atual:</label>
-                             <textarea class="w-full mt-1 p-3 border border-gray-300 rounded-lg h-32" placeholder="Ex: O cliente João parece ser um LOBO. Focar em apresentar o ROI do projeto na próxima reunião..."></textarea>
-                        </div>
-                    </div>
-                    <div>
-                        <h2 class="text-3xl font-bold mb-2">Gatilhos Mentais Essenciais</h2>
-                        <p class="text-gray-600 mb-6">Técnicas de persuasão para acelerar o fechamento.</p>
-                        <div class="space-y-4">
-                           <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group"><summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">Prova Social</summary><p class="mt-2 text-gray-700"><strong>O que é:</strong> As pessoas tendem a seguir o comportamento da maioria. Se muitos usam, deve ser bom.<br><strong>Exemplo:</strong> "Já temos mais de 500 empresas no seu setor que usam nossa solução para otimizar o estoque."</p></details>
-                           <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group"><summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">Escassez & Urgência</summary><p class="mt-2 text-gray-700"><strong>O que é:</strong> As pessoas dão mais valor ao que é limitado no tempo ou na quantidade.<br><strong>Exemplo:</strong> "Temos apenas 3 vagas para implementação com esse valor promocional, e a oferta se encerra nesta sexta-feira."</p></details>
-                           <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group"><summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">Reciprocidade</summary><p class="mt-2 text-gray-700"><strong>O que é:</strong> A tendência natural de querer retribuir algo de valor que recebemos.<br><strong>Exemplo:</strong> "Com base na nossa conversa, preparei um diagnóstico rápido e gratuito da sua operação. Gostaria de ver?"</p></details>
-                           <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group"><summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">Autoridade</summary><p class="mt-2 text-gray-700"><strong>O que é:</strong> As pessoas confiam mais em quem se posiciona como um especialista.<br><strong>Exemplo:</strong> "Nossa metodologia foi premiada pela revista X e é baseada em 15 anos de experiência no mercado."</p></details>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </main>
     </div>
 
-    <script>
-        let draggedCard = null;
-        // Variável global para armazenar os dados do último cálculo bem-sucedido
-        let lastCalcState = {};
+    <div id="appContent" class="hidden">
+        <div class="container mx-auto p-4 md:p-8 max-w-screen-2xl">
+            <header class="flex flex-col md:flex-row justify-between items-center mb-10">
+                <div class="text-center md:text-left">
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Caixa de Ferramentas do Vendedor</h1>
+                    <p class="text-lg text-gray-600 mt-2">Suas ferramentas essenciais para vender mais e melhor.</p>
+                </div>
+                <div id="userSection" class="hidden mt-4 md:mt-0 text-center md:text-right">
+                    <div class="bg-white p-3 rounded-lg shadow-sm border">
+                        <p class="text-xs font-medium text-gray-500">Vendedor:</p>
+                        <p id="userEmailDisplay" class="text-sm font-semibold text-blue-700"></p>
+                        <div id="syncStatus" class="flex items-center justify-center md:justify-end text-xs mt-2"></div>
+                        <button id="logoutButton" class="mt-2 text-xs text-red-600 hover:underline">Sair</button>
+                    </div>
+                </div>
+            </header>
 
+            <div class="mb-8 border-b border-gray-200">
+                <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
+                    <button onclick="window.changeTab(event, 'lucratividade')" class="tab-button active text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-calculator"></i>Calculadoras</button>
+                    <button onclick="window.changeTab(event, 'script')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-scroll"></i>Gerador de Script</button>
+                    <button onclick="window.changeTab(event, 'funil')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-funnel"></i>Funil de Vendas</button>
+                    <button onclick="window.changeTab(event, 'concorrencia')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-users-three"></i>Concorrência</button>
+                    <button onclick="window.changeTab(event, 'estrategias')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-strategy"></i>Estratégias & Objeções</button>
+                </nav>
+            </div>
+
+            <main>
+                <!-- Calculadoras -->
+                <div id="lucratividade" class="tab-content active">
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                        <!-- Nova Calculadora Financeira -->
+                        <div class="bg-white p-6 md:p-8 rounded-lg shadow-md lg:col-span-3">
+                            <h2 class="text-2xl font-bold mb-1">Calculadoras Financeiras</h2>
+                            <p class="text-gray-600 mb-4">Selecione o modo de cálculo e preencha os campos.</p>
+                            
+                            <div class="flex items-center justify-center gap-2 mb-6 bg-gray-100 p-1 rounded-lg">
+                                <button id="btnLucratividade" onclick="window.changeCalcMode('lucratividade')" class="calc-mode-btn active">Lucratividade</button>
+                                <button id="btnRoi" onclick="window.changeCalcMode('roi')" class="calc-mode-btn">ROI (Cliente)</button>
+                                <button id="btnTco" onclick="window.changeCalcMode('tco')" class="calc-mode-btn">TCO (Custo Total)</button>
+                            </div>
+
+                            <!-- MODO PRODUTO ÚNICO / KIT -->
+                            <div id="modoLucratividade">
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+                                    <h4 class="font-bold text-blue-800">Para que serve?</h4>
+                                    <p class="text-sm text-blue-700 mt-1">Use esta calculadora para definir o preço de venda de um produto ou proposta (kit) garantindo sua margem de lucro, ou para analisar a lucratividade de um preço já definido. Ideal para o planejamento interno.</p>
+                                </div>
+                            <div class="flex items-center justify-center gap-2 mb-6 bg-gray-200 p-1 rounded-lg w-full md:w-2/3 mx-auto">
+                                    <button id="btnProdutoUnico" onclick="window.changeSubCalcMode('unico')" class="calc-mode-btn active">Produto Único</button>
+                                    <button id="btnKit" onclick="window.changeSubCalcMode('kit')" class="calc-mode-btn">Proposta (Kit)</button>
+                                </div>
+                                <!-- MODO PRODUTO ÚNICO -->
+                                <div id="calcModoUnico">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                                        <div class="space-y-4">
+                                            <h3 class="font-semibold text-lg border-b pb-2">1. Custos Diretos</h3>
+                                            <div><label for="custoProduto" class="block text-sm font-medium text-gray-700 tooltip-container">Custo do Produto (R$) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Valor pago ao fornecedor pela mercadoria que está sendo vendida.</span></label><input type="number" id="custoProduto" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="100.00"></div>
+                                            <div><label for="frete" class="block text-sm font-medium text-gray-700 tooltip-container">Frete (R$) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Custo de transporte para entregar o produto ao cliente, caso seja pago pela sua empresa.</span></label><input type="number" id="frete" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="25.00"></div>
+                                        </div>
+                                        <div class="space-y-4">
+                                            <h3 class="font-semibold text-lg border-b pb-2">2. Despesas da Venda</h3>
+                                            <div><label for="impostosUnico" class="block text-sm font-medium text-gray-700 tooltip-container">Impostos (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual total de impostos que incidem sobre o preço da venda (Ex: ICMS, PIS, COFINS).</span></label><input type="number" id="impostosUnico" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="10"></div>
+                                            <div><label for="taxaPagamentoUnico" class="block text-sm font-medium text-gray-700 tooltip-container">Taxa Pagamento (à vista) (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual da taxa da maquininha de cartão, gateway de pagamento ou boleto para pagamento à vista.</span></label><input type="number" id="taxaPagamentoUnico" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="4.5"></div>
+                                            <div><label for="comissaoUnico" class="block text-sm font-medium text-gray-700 tooltip-container">Comissão (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Percentual de comissão a ser pago ao vendedor sobre o preço da venda.</span></label><input type="number" id="comissaoUnico" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="5"></div>
+                                            <div><label for="custoFixoUnico" class="block text-sm font-medium text-gray-700 tooltip-container">Rateio Custo Fixo (%) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Opcional. Um percentual do preço da venda para ajudar a cobrir custos fixos da empresa (aluguel, salários, etc.).</span></label><input type="number" id="custoFixoUnico" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="3"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- MODO PROPOSTA (KIT) -->
+                                <div id="calcModoKit" class="hidden">
+                                    <h3 class="font-semibold text-lg border-b pb-2">1. Itens da Proposta</h3>
+                                    <div id="itensKitContainer" class="space-y-3 mt-4 max-h-48 overflow-y-auto pr-2">
+                                        <!-- Itens adicionados dinamicamente aqui -->
+                                    </div>
+                                    <div class="flex gap-2 mt-4 p-2 bg-gray-50 rounded-md items-end">
+                                        <div class="flex-grow"><label class="text-xs font-medium">Nome do Item</label><input type="text" id="kitItemNome" placeholder="Ex: Produto A" class="mt-1 w-full px-2 py-1 border border-gray-300 rounded-md"></div>
+                                        <div class="w-28"><label class="text-xs font-medium">Custo (R$)</label><input type="number" id="kitItemCusto" placeholder="50.00" class="mt-1 w-full px-2 py-1 border border-gray-300 rounded-md"></div>
+                                        <div class="w-20"><label class="text-xs font-medium">Qtd.</label><input type="number" id="kitItemQtd" value="1" class="mt-1 w-full px-2 py-1 border border-gray-300 rounded-md"></div>
+                                        <button onclick="window.adicionarItemKit()" class="bg-blue-500 text-white rounded-md h-9 w-9 flex-shrink-0 hover:bg-blue-600"><i class="ph-bold ph-plus"></i></button>
+                                    </div>
+                                    <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-right">
+                                        <span class="text-sm font-medium text-gray-600">Custo Total dos Itens:</span>
+                                        <span id="custoTotalKit" class="text-lg font-bold text-blue-700 ml-2">R$ 0,00</span>
+                                    </div>
+                                    <div class="mt-4">
+                                        <h3 class="font-semibold text-lg border-b pb-2">2. Despesas da Proposta</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 mt-4">
+                                            <div class="space-y-4 md:col-start-2">
+                                                <div><label for="impostosKit" class="block text-sm font-medium text-gray-700">Impostos (%)</label><input type="number" id="impostosKit" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="10"></div>
+                                                <div><label for="taxaPagamentoKit" class="block text-sm font-medium text-gray-700">Taxa Pagamento (à vista) (%)</label><input type="number" id="taxaPagamentoKit" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="4.5"></div>
+                                                <div><label for="comissaoKit" class="block text-sm font-medium text-gray-700">Comissão (%)</label><input type="number" id="comissaoKit" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="5"></div>
+                                                <div><label for="custoFixoKit" class="block text-sm font-medium text-gray-700">Rateio Custo Fixo (%)</label><input type="number" id="custoFixoKit" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="3"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SEÇÃO DE PREÇO E LUCRO (COMUM A AMBOS) -->
+                                <div class="mt-6 pt-6 border-t">
+                                    <h3 class="font-semibold text-lg pb-2">3. Preço e Lucro</h3>
+                                    <p class="text-sm text-gray-500 mb-4">Preencha <span class="font-bold">um</span> dos campos abaixo e clique no botão correspondente.</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                        <div>
+                                            <label for="precoVenda" class="block text-sm font-medium text-gray-700">Preço de Venda Final (R$)</label>
+                                            <input type="number" id="precoVenda" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="250.00">
+                                            <button onclick="window.analiseFinanceira('analisar')" class="mt-2 w-full bg-emerald-600 text-white font-bold py-2 px-4 rounded-md hover:bg-emerald-700 transition">Analisar Venda</button>
+                                        </div>
+                                        <div>
+                                            <label for="margemLucro" class="block text-sm font-medium text-gray-700">Margem de Lucro Desejada (%)</label>
+                                            <input type="number" id="margemLucro" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="20">
+                                            <button onclick="window.analiseFinanceira('precificar')" class="mt-2 w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition">Calcular Preço</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- MODO ROI -->
+                            <div id="calcModoRoi" class="hidden">
+                                <div class="bg-teal-50 border-l-4 border-teal-500 p-4 mb-6 rounded-r-lg">
+                                    <h4 class="font-bold text-teal-800">Para que serve?</h4>
+                                    <p class="text-sm text-teal-700 mt-1">Use esta ferramenta para mostrar ao cliente que seu produto não é um custo, mas um investimento. Calcule em quanto tempo ele recupera o valor pago e qual será o retorno financeiro, transformando a conversa de preço em uma conversa de valor.</p>
+                                </div>
+                                <h3 class="font-semibold text-xl border-b pb-2 mb-4">Calculadora de ROI para o Cliente</h3>
+                                <div class="space-y-4">
+                                    <div class="relative">
+                                        <label for="roiInvestimento" class="block text-sm font-medium text-gray-700 tooltip-container">Investimento Total (R$) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">O preço final da sua solução para o cliente.</span></label>
+                                        <input type="number" id="roiInvestimento" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="5000.00">
+                                        <button onclick="window.usarUltimoPreco()" class="absolute right-2 top-7 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-1 px-2 rounded">Usar último preço</button>
+                                    </div>
+                                    <div><label for="roiGanhos" class="block text-sm font-medium text-gray-700 tooltip-container">Ganhos Mensais p/ Cliente (R$) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Quanto o cliente vai economizar ou faturar a mais por mês com sua solução.</span></label><input type="number" id="roiGanhos" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="800.00"></div>
+                                    <div><label for="roiCustoMensal" class="block text-sm font-medium text-gray-700 tooltip-container">Custo Mensal da Solução (R$) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Se houver uma mensalidade ou custo de manutenção, informe aqui. Deixe 0 se não houver.</span></label><input type="number" id="roiCustoMensal" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="0"></div>
+                                    <div><label for="roiPeriodo" class="block text-sm font-medium text-gray-700 tooltip-container">Período de Análise (meses) <i class="ph ph-question tooltip-icon"></i><span class="tooltip-text">Informe em quantos meses você deseja calcular o retorno para o cliente. Comum usar 12, 24 ou 36 meses.</span></label><input type="number" id="roiPeriodo" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" value="12" placeholder="12"></div>
+                                </div>
+                                <button onclick="window.calcularRoi()" class="mt-6 w-full bg-teal-600 text-white font-bold py-3 px-4 rounded-md hover:bg-teal-700 transition">Calcular ROI</button>
+                            </div>
+
+                            <!-- MODO TCO -->
+                            <div id="calcModoTco" class="hidden">
+                                <div class="bg-purple-50 border-l-4 border-purple-500 p-4 mb-6 rounded-r-lg">
+                                    <h4 class="font-bold text-purple-800">Para que serve?</h4>
+                                    <p class="text-sm text-purple-700 mt-1">Use esta calculadora para provar que sua solução, mesmo que tenha um preço inicial maior, é mais econômica a longo prazo. Compare-a com uma alternativa mais barata e mostre a economia real que o cliente terá com o Custo Total de Propriedade.</p>
+                                </div>
+                                <h3 class="font-semibold text-xl border-b pb-2 mb-4">Calculadora de Custo Total de Propriedade (TCO)</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Sua Solução -->
+                                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                        <h4 class="font-bold text-lg text-blue-800">Sua Solução</h4>
+                                        <div class="space-y-3 mt-2">
+                                            <div><label for="tcoPrecoA" class="text-sm font-medium">Preço de Compra (R$)</label><input id="tcoPrecoA" type="number" placeholder="10000" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                                            <div><label for="tcoManutencaoA" class="text-sm font-medium">Custo Anual (manutenção, etc)</label><input id="tcoManutencaoA" type="number" placeholder="200" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                                            <div><label for="tcoVidaUtilA" class="text-sm font-medium">Vida Útil (Anos)</label><input id="tcoVidaUtilA" type="number" placeholder="5" value="5" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                                        </div>
+                                    </div>
+                                    <!-- Concorrente -->
+                                    <div class="bg-gray-100 p-4 rounded-lg border">
+                                        <h4 class="font-bold text-lg text-gray-800">Concorrente / Alternativa</h4>
+                                        <div class="space-y-3 mt-2">
+                                            <div><label for="tcoPrecoB" class="text-sm font-medium">Preço de Compra (R$)</label><input id="tcoPrecoB" type="number" placeholder="7000" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                                            <div><label for="tcoManutencaoB" class="text-sm font-medium">Custo Anual (manutenção, etc)</label><input id="tcoManutencaoB" type="number" placeholder="800" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                                            <div><label for="tcoVidaUtilB" class="text-sm font-medium">Vida Útil (Anos)</label><input id="tcoVidaUtilB" type="number" placeholder="3" value="3" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onclick="window.calcularTco()" class="mt-6 w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition">Calcular Custo Total</button>
+                            </div>
+                        </div>
+                        <!-- Coluna de Resultados -->
+                        <div class="bg-white p-6 md:p-8 rounded-lg shadow-md lg:col-span-2">
+                            <h2 class="text-2xl font-bold mb-1">Resultados</h2>
+                            <div id="resultadoAnalise" class="result-box mt-6">
+                                <p class="text-gray-500 text-center py-10">Preencha os campos e calcule para ver os resultados.</p>
+                            </div>
+                            <!-- Simulador de Negociação -->
+                            <div id="simuladorNegociacao" class="mt-6 hidden">
+                                <h2 class="text-2xl font-bold mb-1 border-t pt-6">Simulador de Negociação</h2>
+                                <p class="text-gray-600 mb-6">Teste cenários para tomar as melhores decisões.</p>
+
+                                <div class="space-y-6">
+                                    <!-- Simular Desconto -->
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <h3 class="font-semibold text-lg">1. Qual o impacto de um desconto?</h3>
+                                        <div class="flex items-end gap-2 mt-2">
+                                            <div class="flex-grow">
+                                                <label for="simularDescontoInput" class="text-sm font-medium">Desconto (%)</label>
+                                                <input type="number" id="simularDescontoInput" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="10">
+                                            </div>
+                                            <button onclick="window.simularDesconto()" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 transition h-11">Simular</button>
+                                        </div>
+                                        <div id="resultadoSimularDesconto" class="mt-3"></div>
+                                    </div>
+
+                                    <!-- Calcular Desconto Máximo -->
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <h3 class="font-semibold text-lg">2. Qual o desconto máximo que posso dar?</h3>
+                                        <div class="flex items-end gap-2 mt-2">
+                                            <div class="flex-grow">
+                                                <label for="descontoMaximoInput" class="text-sm font-medium">Mantendo a margem mínima de (%)</label>
+                                                <input type="number" id="descontoMaximoInput" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="15">
+                                            </div>
+                                            <button onclick="window.calcularDescontoMaximo()" class="bg-rose-600 text-white font-bold py-2 px-4 rounded-md hover:bg-rose-700 transition h-11">Calcular</button>
+                                        </div>
+                                        <div id="resultadoDescontoMaximo" class="mt-3"></div>
+                                    </div>
+                                    
+                                    <!-- Simular Parcelamento -->
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <h3 class="font-semibold text-lg">3. Como fica o lucro se eu parcelar?</h3>
+                                        <div class="mt-3">
+                                            <label class="text-sm font-medium text-gray-700">Quem assume a taxa?</label>
+                                            <div class="flex gap-2 mt-1" id="quemPagaTaxaContainer">
+                                                <button type="button" data-value="empresa" class="quem-paga-btn active flex-1">Nós (Empresa)</button>
+                                                <button type="button" data-value="cliente" class="quem-paga-btn flex-1">Cliente</button>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2 mt-3">
+                                            <div class="flex-grow">
+                                                <label for="numParcelasInput" class="text-sm font-medium">Nº de Parcelas</label>
+                                                <input type="number" id="numParcelasInput" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="3">
+                                            </div>
+                                            <div class="flex-grow">
+                                                <label for="taxaParcelamentoInput" class="text-sm font-medium">Taxa da Operadora (%)</label>
+                                                <input type="number" id="taxaParcelamentoInput" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="8.5">
+                                            </div>
+                                        </div>
+                                        <button onclick="window.calcularParcelamento()" class="w-full mt-3 bg-cyan-600 text-white font-bold py-2 px-4 rounded-md hover:bg-cyan-700 transition">Calcular Parcelamento</button>
+                                        <div id="resultadoParcelamento" class="mt-3"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- O restante do HTML das outras abas (funil, script, etc.) vai aqui -->
+                <!-- Gerador de Script -->
+                <div id="script" class="tab-content">
+                    <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+                        <h2 class="text-2xl font-bold mb-1">Gerador de Script de Vendas</h2>
+                        <p class="text-gray-600 mb-6">Preencha os campos para criar um roteiro de abordagem inicial.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div><label for="scriptNomeCliente" class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente</label><input type="text" id="scriptNomeCliente" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: João Silva"></div>
+                            <div><label for="scriptNomeEmpresa" class="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa do Cliente</label><input type="text" id="scriptNomeEmpresa" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Silva & Filhos Ltda"></div>
+                            <div><label for="scriptProduto" class="block text-sm font-medium text-gray-700 mb-1">Seu Produto/Serviço</label><input type="text" id="scriptProduto" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Software de Gestão"></div>
+                            <div><label for="scriptDor" class="block text-sm font-medium text-gray-700 mb-1">Principal Dor que resolve</label><input type="text" id="scriptDor" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Otimizar o controle de estoque"></div>
+                        </div>
+                        <button onclick="window.gerarScript()" class="mt-6 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition">Gerar Script</button>
+                        <div id="resultadoScript" class="result-box mt-6 hidden whitespace-pre-wrap"></div>
+                    </div>
+                </div>
+                
+                <!-- Funil de Vendas -->
+                <div id="funil" class="tab-content">
+                    <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                        <h2 class="text-3xl font-bold mb-2">Funil de Vendas Pessoal</h2>
+                        <p class="text-gray-600 mb-6">Arraste os negócios entre as fases para atualizar seu pipeline. Seus dados são salvos automaticamente.</p>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                            <div class="indicator-card flex items-start gap-4 p-5">
+                                <div class="bg-blue-100 text-blue-600 p-3 rounded-lg"><i class="ph-bold ph-chart-line-up text-2xl"></i></div>
+                                <div><p class="text-sm text-gray-500">Valor em Aberto</p><p id="active-value" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
+                            </div>
+                            <div class="indicator-card flex items-start gap-4 p-5">
+                                <div class="bg-indigo-100 text-indigo-600 p-3 rounded-lg"><i class="ph-bold ph-scales text-2xl"></i></div>
+                                <div><p class="text-sm text-gray-500">Forecast Ponderado</p><p id="weighted-value" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
+                            </div>
+                            <div class="indicator-card flex items-start gap-4 p-5">
+                                <div class="bg-amber-100 text-amber-600 p-3 rounded-lg"><i class="ph-bold ph-tag text-2xl"></i></div>
+                                <div><p class="text-sm text-gray-500">Ticket Médio (Ganho)</p><p id="average-ticket" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
+                            </div>
+                            <div class="indicator-card flex items-start gap-4 p-5">
+                                <div class="bg-emerald-100 text-emerald-600 p-3 rounded-lg"><i class="ph-bold ph-trophy text-2xl"></i></div>
+                                <div><p class="text-sm text-gray-500">Total Ganho</p><p id="won-value" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
+                            </div>
+                            <div class="indicator-card flex items-start gap-4 p-5">
+                                <div class="bg-slate-100 text-slate-600 p-3 rounded-lg"><i class="ph-bold ph-thumbs-down text-2xl"></i></div>
+                                <div><p class="text-sm text-gray-500">Total Perdido</p><p id="lost-value" class="text-2xl font-bold text-gray-800">R$ 0,00</p></div>
+                            </div>
+                            <div class="indicator-card flex items-start gap-4 p-5">
+                                <div class="bg-rose-100 text-rose-600 p-3 rounded-lg"><i class="ph-bold ph-arrows-clockwise text-2xl"></i></div>
+                                <div><p class="text-sm text-gray-500">Taxa de Conversão</p><p id="conversion-rate" class="text-2xl font-bold text-gray-800">0%</p></div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col md:flex-row gap-4 mb-6 border-b pb-6">
+                            <input type="text" id="newCardInput" class="flex-grow px-4 py-2 border border-gray-300 rounded-lg shadow-sm" placeholder="Nome do novo lead/negócio">
+                            <button onclick="window.addCard()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"><i class="ph-bold ph-plus-circle"></i> Adicionar</button>
+                        </div>
+                        <div class="kanban-board">
+                            <div class="kanban-column" data-column="prospect"><div class="kanban-column-header"><h3><i class="ph-fill ph-binoculars text-sky-500"></i> Prospectando</h3><div class="column-indicators" id="indicators-prospect"></div></div><div class="kanban-cards"></div></div>
+                            <div class="kanban-column" data-column="qualify"><div class="kanban-column-header"><h3><i class="ph-fill ph-lightbulb text-amber-500"></i> Qualificação</h3><div class="column-indicators" id="indicators-qualify"></div></div><div class="kanban-cards"></div></div>
+                            <div class="kanban-column" data-column="proposal"><div class="kanban-column-header"><h3><i class="ph-fill ph-file-text text-indigo-500"></i> Proposta</h3><div class="column-indicators" id="indicators-proposal"></div></div><div class="kanban-cards"></div></div>
+                            <div class="kanban-column" data-column="negotiate"><div class="kanban-column-header"><h3><i class="ph-fill ph-handshake text-rose-500"></i> Negociação</h3><div class="column-indicators" id="indicators-negotiate"></div></div><div class="kanban-cards"></div></div>
+                            <div class="kanban-column" data-column="won"><div class="kanban-column-header"><h3><i class="ph-fill ph-trophy text-emerald-500"></i> Ganho</h3><div class="column-indicators" id="indicators-won"></div></div><div class="kanban-cards"></div></div>
+                            <div class="kanban-column" data-column="lost"><div class="kanban-column-header"><h3><i class="ph-fill ph-x-circle text-slate-500"></i> Perdido</h3><div class="column-indicators" id="indicators-lost"></div></div><div class="kanban-cards"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Análise de Concorrência -->
+                <div id="concorrencia" class="tab-content">
+                    <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+                        <h2 class="text-2xl font-bold mb-1">Análise de Concorrência</h2>
+                        <p class="text-gray-600 mb-6">Anote os pontos fortes e fracos dos seus principais concorrentes. Suas notas são salvas automaticamente.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="bg-gray-50 p-4 rounded-lg"><input type="text" id="concorrente1_nome" placeholder="Nome do Concorrente 1" class="w-full font-bold text-lg mb-2 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500" oninput="window.debounceSaveNotes()"><label class="font-semibold mt-4 block">Pontos Fortes:</label><textarea id="concorrente1_fortes" class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" placeholder="Ex: Preço agressivo..." oninput="window.debounceSaveNotes()"></textarea><label class="font-semibold mt-4 block">Pontos Fracos:</label><textarea id="concorrente1_fracos" class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" placeholder="Ex: Suporte ao cliente..." oninput="window.debounceSaveNotes()"></textarea></div>
+                            <div class="bg-gray-50 p-4 rounded-lg"><input type="text" id="concorrente2_nome" placeholder="Nome do Concorrente 2" class="w-full font-bold text-lg mb-2 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500" oninput="window.debounceSaveNotes()"><label class="font-semibold mt-4 block">Pontos Fortes:</label><textarea id="concorrente2_fortes" class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" oninput="window.debounceSaveNotes()"></textarea><label class="font-semibold mt-4 block">Pontos Fracos:</label><textarea id="concorrente2_fracos" class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" oninput="window.debounceSaveNotes()"></textarea></div>
+                            <div class="bg-gray-50 p-4 rounded-lg"><input type="text" id="concorrente3_nome" placeholder="Nome do Concorrente 3" class="w-full font-bold text-lg mb-2 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500" oninput="window.debounceSaveNotes()"><label class="font-semibold mt-4 block">Pontos Fortes:</label><textarea id="concorrente3_fortes" class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" oninput="window.debounceSaveNotes()"></textarea><label class="font-semibold mt-4 block">Pontos Fracos:</label><textarea id="concorrente3_fracos" class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" oninput="window.debounceSaveNotes()"></textarea></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estratégias de Vendas -->
+                <div id="estrategias" class="tab-content">
+                    <div class="bg-white p-6 md:p-8 rounded-lg shadow-md space-y-10">
+                        <div>
+                            <h2 class="text-3xl font-bold mb-2">Decifrando Perfis de Cliente</h2>
+                            <p class="text-gray-600 mb-6">Adapte sua abordagem ao estilo de cada cliente para aumentar suas chances de sucesso.</p>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- Lobo -->
+                                <div class="bg-sky-50 p-5 rounded-lg border border-sky-200">
+                                    <h3 class="font-bold text-xl mb-3 flex items-center gap-2"><i class="ph-bold ph-user-focus text-sky-600"></i>LOBO</h3>
+                                    <p class="text-gray-700 mt-1 mb-3">Disciplinado, observador e metódico. Organizado e capaz de criar planos para alcançar objetivos.</p>
+                                    <p class="font-semibold">Como vender:</p>
+                                    <ul class="list-disc list-inside text-gray-700 mt-1"><li>Apresente dados, fatos e lógica.</li><li>Seja preciso, direto e não pressione.</li><li>Dê tempo para ele analisar e decidir.</li></ul>
+                                </div>
+                                <!-- Gato -->
+                                <div class="bg-amber-50 p-5 rounded-lg border border-amber-200">
+                                    <h3 class="font-bold text-xl mb-3 flex items-center gap-2"><i class="ph-bold ph-chats text-amber-600"></i>GATO</h3>
+                                    <p class="text-gray-700 mt-1 mb-3">Comunicador, diplomático e sociável. Fortalece relacionamentos e tem facilidade em lidar com clientes.</p>
+                                    <p class="font-semibold">Como vender:</p>
+                                    <ul class="list-disc list-inside text-gray-700 mt-1"><li>Crie rapport primeiro, construa confiança.</li><li>Use depoimentos de outros clientes felizes.</li><li>Dê garantias e segurança. Ele compra de quem confia.</li></ul>
+                                </div>
+                                <!-- Tubarão -->
+                                <div class="bg-rose-50 p-5 rounded-lg border border-rose-200">
+                                    <h3 class="font-bold text-xl mb-3 flex items-center gap-2"><i class="ph-bold ph-trend-up text-rose-600"></i>TUBARÃO</h3>
+                                    <p class="text-gray-700 mt-1 mb-3">Focado em resultados e executor. Não deixa para amanhã e traz respostas rápidas para o serviço.</p>
+                                    <p class="font-semibold">Como vender:</p>
+                                    <ul class="list-disc list-inside text-gray-700 mt-1"><li>Seja rápido e vá direto ao ponto (objetivos).</li><li>Mostre como sua solução traz resultados mensuráveis.</li><li>Apresente opções para ele sentir que está no controle.</li></ul>
+                                </div>
+                                <!-- Águia -->
+                                <div class="bg-indigo-50 p-5 rounded-lg border border-indigo-200">
+                                    <h3 class="font-bold text-xl mb-3 flex items-center gap-2"><i class="ph-bold ph-rocket-launch text-indigo-600"></i>ÁGUIA</h3>
+                                    <p class="text-gray-700 mt-1 mb-3">Visão diferenciada e criatividade. Capaz de propor inovações e visualizar o futuro.</p>
+                                    <p class="font-semibold">Como vender:</p>
+                                    <ul class="list-disc list-inside text-gray-700 mt-1"><li>Mostre como sua solução é inovadora e visionária.</li><li>Deixe-o falar e elogie suas ideias.</li><li>Use visuais impactantes e foque nas possibilidades futuras.</li></ul>
+                                </div>
+                            </div>
+                            <div class="mt-8">
+                                <label class="font-bold text-xl mb-3 block">Anotações sobre o cliente atual:</label>
+                                <textarea id="anotacoes_cliente" class="w-full mt-1 p-3 border border-gray-300 rounded-lg h-32" placeholder="Ex: O cliente João parece ser um LOBO. Focar em apresentar o ROI do projeto na próxima reunião..." oninput="window.debounceSaveNotes()"></textarea>
+                            </div>
+                        </div>
+                        <div class="pt-10">
+                            <h2 class="text-3xl font-bold mb-2">Guia de Quebra de Objeções</h2>
+                            <p class="text-gray-600 mb-6">Use estes roteiros para transformar um "não" em uma oportunidade.</p>
+                            <div class="space-y-4">
+                            <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group border">
+                                    <summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">"Está muito caro."</summary>
+                                    <div class="mt-3 pt-3 border-t text-gray-700 space-y-2">
+                                        <p><strong>1. Valide e Empatize:</strong> "Eu entendo sua preocupação com o investimento, [Nome do Cliente]. É fundamental que cada real investido traga o máximo de retorno."</p>
+                                        <p><strong>2. Isole a Objeção:</strong> "Só para eu entender melhor, a questão do valor é o único ponto que te impede de avançarmos agora? Se encontrarmos uma forma que se encaixe no seu orçamento, a solução atende ao que você precisa?"</p>
+                                        <p><strong>3. Argumente com Valor (use as calculadoras!):</strong> "Vamos revisitar aquele cálculo de <strong>ROI</strong> que fizemos. O investimento se paga em X meses e, em 2 anos, gera um lucro de R$ Y para a sua empresa. Ou, se compararmos com a alternativa Z (<strong>TCO</strong>), nossa solução representa uma economia de R$ W no longo prazo. Não seria um custo, mas o caminho mais lucrativo."</p>
+                                        <p><strong>4. Confirme:</strong> "Analisando por essa perspectiva de lucro/economia, o investimento não parece mais estratégico?"</p>
+                                    </div>
+                                </details>
+                                <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group border">
+                                    <summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">"Preciso pensar / Vou falar com meu sócio."</summary>
+                                    <div class="mt-3 pt-3 border-t text-gray-700 space-y-2">
+                                        <p><strong>1. Valide e Empatize:</strong> "Claro, [Nome do Cliente]. Uma decisão como essa precisa ser bem pensada e alinhada com todos os envolvidos."</p>
+                                        <p><strong>2. Isole a Objeção:</strong> "Para que você possa pensar com todas as informações na mão, existe algum ponto da proposta que não ficou 100% claro ou alguma dúvida que eu possa esclarecer agora?"</p>
+                                        <p><strong>3. Argumente com Valor e Urgência (sutil):</strong> "Perfeito. Enquanto você e seu sócio analisam, posso te enviar o estudo de caso da empresa Y, que tinha um desafio parecido com o de vocês. Eles começaram a ver os primeiros resultados em Z dias. Apenas para seu conhecimento, nossa agenda de implementação para o próximo mês já está quase completa."</p>
+                                        <p><strong>4. Defina o Próximo Passo:</strong> "Que tal agendarmos uma breve chamada na quarta-feira às 10h? Assim eu posso esclarecer qualquer dúvida que seu sócio tenha e podemos definir os próximos passos."</p>
+                                    </div>
+                                </details>
+                                <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group border">
+                                    <summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">"O concorrente X tem um preço menor."</summary>
+                                    <div class="mt-3 pt-3 border-t text-gray-700 space-y-2">
+                                        <p><strong>1. Valide e Empatize:</strong> "Obrigado por compartilhar isso. A empresa X é uma boa empresa e é natural que você esteja comparando todas as opções."</p>
+                                        <p><strong>2. Isole a Objeção:</strong> "Além do preço, existe algum outro fator na proposta deles que te agradou mais que a nossa?"</p>
+                                        <p><strong>3. Argumente com Valor (use a TCO!):</strong> "Entendo que o preço inicial deles seja menor. Inclusive, podemos usar nossa calculadora de <strong>Custo Total de Propriedade (TCO)</strong>. A solução deles tem uma vida útil de Y anos e um custo de manutenção anual de R$ Z. A nossa, embora o investimento inicial seja um pouco maior, dura W anos e tem um custo anual de apenas R$ K. No final de 5 anos, a nossa solução representa uma economia de R$ X. O barato pode sair caro."</p>
+                                        <p><strong>4. Confirme:</strong> "Pensando no longo prazo e na economia total, qual das duas opções parece ser o melhor investimento para sua empresa?"</p>
+                                    </div>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script type="module">
+        // Importa as funções do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        
+        // --- Configuração do Firebase ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBe9yjpAUXzNyCWZie2bbHd69D5uqDVqhM",
+            authDomain: "vendasjd-7eaee.firebaseapp.com",
+            projectId: "vendasjd-7eaee",
+            storageBucket: "vendasjd-7eaee.appspot.com",
+            messagingSenderId: "623306912799",
+            appId: "1:623306912799:web:8cebe639870d79476e912a",
+            measurementId: "G-JNJMYVRRRV"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- Variáveis Globais de Estado ---
+        let draggedCard = null;
+        let lastCalcState = {};
+        let currentCalcMode = 'lucratividade';
+        let currentSubCalcMode = 'unico';
+        window.cardIdCounter = 0; 
+        let userId = null;
+        let kanbanUnsubscribe = () => {};
+        let notesUnsubscribe = () => {};
+        let saveNotesTimeout;
+
+        // --- Funções de Lógica do Firebase (autenticação) ---
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = '';
+            signInWithEmailAndPassword(auth, email, password)
+                .catch(error => {
+                    errorDiv.textContent = 'Email ou senha inválidos.';
+                });
+        }
+        function handleRegister() {
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const errorDiv = document.getElementById('registerError');
+            errorDiv.textContent = '';
+            if(password.length < 6) {
+                errorDiv.textContent = 'A senha precisa de ter pelo menos 6 caracteres.';
+                return;
+            }
+            createUserWithEmailAndPassword(auth, email, password)
+                .catch(error => {
+                    if (error.code === 'auth/email-already-in-use') {
+                        errorDiv.textContent = 'Este email já está a ser utilizado.';
+                    } else {
+                        errorDiv.textContent = 'Ocorreu um erro ao criar a conta.';
+                    }
+                });
+        }
+        function handleLogout() { signOut(auth); }
+        function toggleAuthForms() {
+            document.getElementById('loginForm').classList.toggle('hidden');
+            document.getElementById('registerForm').classList.toggle('hidden');
+            document.getElementById('loginError').textContent = '';
+            document.getElementById('registerError').textContent = '';
+        }
+
+        // --- Funções Auxiliares de UI ---
+        const formatCurrency = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        function updateStatus(text, color = 'text-gray-500', showSpinner = true) {
+            const statusEl = document.getElementById('syncStatus');
+            if (statusEl) {
+                statusEl.innerHTML = `
+                    <svg class="animate-spin h-4 w-4 mr-2 ${showSpinner ? '' : 'hidden'}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="${color}">${text}</span>`;
+            }
+        }
+
+        // --- Funções de Lógica do Firebase (Firestore) ---
+        async function saveKanbanState() {
+            if (!userId) return;
+            updateStatus('A salvar funil...', 'text-yellow-600');
+            const boardState = { columns: {} };
+            document.querySelectorAll('.kanban-column').forEach(column => {
+                const columnId = column.dataset.column;
+                const cards = [];
+                column.querySelectorAll('.kanban-card').forEach(card => {
+                    cards.push({
+                        id: card.id,
+                        title: card.querySelector('.card-title').textContent,
+                        value: parseFloat(card.querySelector('.card-value-input').value) || 0,
+                    });
+                });
+                boardState.columns[columnId] = cards;
+            });
+            const kanbanDocRef = doc(db, `users/${userId}/kanban/boardState`);
+            try {
+                await setDoc(kanbanDocRef, { board: JSON.stringify(boardState) });
+                updateStatus('Salvo', 'text-green-600', false);
+            } catch (error) {
+                console.error("Erro ao salvar o funil:", error);
+                updateStatus('Erro ao salvar', 'text-red-600', false);
+            }
+        }
+
+        function loadKanbanState(data) {
+            const kanbanCardsContainer = document.querySelector('.kanban-cards');
+            if (!kanbanCardsContainer) return;
+            if (data && data.board) {
+                const boardState = JSON.parse(data.board);
+                document.querySelectorAll('.kanban-cards').forEach(col => col.innerHTML = '');
+                let maxId = 0;
+                Object.keys(boardState.columns).forEach(columnId => {
+                    const columnEl = document.querySelector(`.kanban-column[data-column="${columnId}"] .kanban-cards`);
+                    if (columnEl) {
+                        boardState.columns[columnId].forEach(cardData => {
+                            const card = document.createElement('div');
+                            card.className = 'kanban-card'; card.draggable = true; card.id = cardData.id;
+                            card.innerHTML = `<span class="card-title">${cardData.title}</span><div class="card-value"><span class="text-gray-500 text-sm">R$</span><input type="number" step="0.01" class="card-value-input" value="${cardData.value}" placeholder="0,00" oninput="window.updateIndicators(); window.saveKanbanState();"></div>`;
+                            addCardEventListeners(card);
+                            columnEl.appendChild(card);
+                            const currentId = parseInt(cardData.id.split('-')[1]);
+                            if (currentId > maxId) maxId = currentId;
+                        });
+                    }
+                });
+                window.cardIdCounter = maxId;
+            }
+            updateIndicators();
+        }
+
+        async function saveNotesState() {
+            if (!userId) return;
+            updateStatus('A salvar anotações...', 'text-yellow-600');
+            const notes = {
+                concorrente1_nome: document.getElementById('concorrente1_nome').value,
+                concorrente1_fortes: document.getElementById('concorrente1_fortes').value,
+                concorrente1_fracos: document.getElementById('concorrente1_fracos').value,
+                concorrente2_nome: document.getElementById('concorrente2_nome').value,
+                concorrente2_fortes: document.getElementById('concorrente2_fortes').value,
+                concorrente2_fracos: document.getElementById('concorrente2_fracos').value,
+                concorrente3_nome: document.getElementById('concorrente3_nome').value,
+                concorrente3_fortes: document.getElementById('concorrente3_fortes').value,
+                concorrente3_fracos: document.getElementById('concorrente3_fracos').value,
+                anotacoes_cliente: document.getElementById('anotacoes_cliente').value
+            };
+            const notesDocRef = doc(db, `users/${userId}/notes/allNotes`);
+            try {
+                await setDoc(notesDocRef, notes);
+                updateStatus('Salvo', 'text-green-600', false);
+            } catch (error) {
+                console.error("Erro ao salvar anotações:", error);
+                updateStatus('Erro ao salvar', 'text-red-600', false);
+            }
+        }
+        
+        function debounceSaveNotes() {
+            clearTimeout(saveNotesTimeout);
+            saveNotesTimeout = setTimeout(saveNotesState, 1500);
+        }
+
+        function loadNotesState(data) {
+             if (data) {
+                document.getElementById('concorrente1_nome').value = data.concorrente1_nome || '';
+                document.getElementById('concorrente1_fortes').value = data.concorrente1_fortes || '';
+                document.getElementById('concorrente1_fracos').value = data.concorrente1_fracos || '';
+                document.getElementById('concorrente2_nome').value = data.concorrente2_nome || '';
+                document.getElementById('concorrente2_fortes').value = data.concorrente2_fortes || '';
+                document.getElementById('concorrente2_fracos').value = data.concorrente2_fracos || '';
+                document.getElementById('concorrente3_nome').value = data.concorrente3_nome || '';
+                document.getElementById('concorrente3_fortes').value = data.concorrente3_fortes || '';
+                document.getElementById('concorrente3_fracos').value = data.concorrente3_fracos || '';
+                document.getElementById('anotacoes_cliente').value = data.anotacoes_cliente || '';
+             }
+        }
+        
+        // --- Funções da Aplicação ---
+        
         function changeTab(event, tabId) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             event.currentTarget.classList.add('active');
         }
+        
+        function changeCalcMode(mode) {
+            currentCalcMode = mode;
+            document.getElementById('modoLucratividade').classList.add('hidden');
+            document.getElementById('calcModoRoi').classList.add('hidden');
+            document.getElementById('calcModoTco').classList.add('hidden');
+            document.querySelectorAll('.calc-mode-btn').forEach(btn => btn.classList.remove('active'));
 
-        // --- LÓGICA DAS CALCULADORAS ---
-        function formatCurrency(value) { return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+            if (mode === 'lucratividade') {
+                document.getElementById('modoLucratividade').classList.remove('hidden');
+                document.getElementById('simuladorNegociacao').classList.remove('hidden');
+                document.getElementById('btnLucratividade').classList.add('active');
+            } else if (mode === 'roi') {
+                 document.getElementById('calcModoRoi').classList.remove('hidden');
+                 document.getElementById('btnRoi').classList.add('active');
+                 document.getElementById('resultadoAnalise').innerHTML = '<p class="text-gray-500 text-center py-10">Preencha os campos da Calculadora de ROI e veja os resultados aqui.</p>';
+                 document.getElementById('simuladorNegociacao').classList.add('hidden');
+            } else if (mode === 'tco') {
+                document.getElementById('calcModoTco').classList.remove('hidden');
+                document.getElementById('btnTco').classList.add('active');
+                document.getElementById('resultadoAnalise').innerHTML = '<p class="text-gray-500 text-center py-10">Preencha os campos da Calculadora de TCO e veja os resultados aqui.</p>';
+                document.getElementById('simuladorNegociacao').classList.add('hidden');
+            }
+        }
+
+        function changeSubCalcMode(subMode) {
+            currentSubCalcMode = subMode;
+             if (subMode === 'unico') {
+                document.getElementById('calcModoUnico').classList.remove('hidden');
+                document.getElementById('calcModoKit').classList.add('hidden');
+                document.getElementById('btnProdutoUnico').classList.add('active');
+                document.getElementById('btnKit').classList.remove('active');
+            } else {
+                document.getElementById('calcModoUnico').classList.add('hidden');
+                document.getElementById('calcModoKit').classList.remove('hidden');
+                document.getElementById('btnProdutoUnico').classList.remove('active');
+                document.getElementById('btnKit').classList.add('active');
+            }
+        }
+
+        function adicionarItemKit() {
+            const nomeInput = document.getElementById('kitItemNome');
+            const custoInput = document.getElementById('kitItemCusto');
+            const qtdInput = document.getElementById('kitItemQtd');
+            const nome = nomeInput.value.trim();
+            const custo = parseFloat(custoInput.value) || 0;
+            const qtd = parseInt(qtdInput.value) || 1;
+            if (!nome || custo <= 0) {
+                alert('Por favor, preencha o nome e um custo válido para o item.');
+                return;
+            }
+            const container = document.getElementById('itensKitContainer');
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'kit-item flex items-center gap-2 bg-white p-2 rounded-md border';
+            itemDiv.dataset.custo = custo;
+            itemDiv.dataset.qtd = qtd;
+            itemDiv.innerHTML = `
+                <div class="flex-grow">
+                    <p class="font-semibold">${nome}</p>
+                    <p class="text-xs text-gray-500">${qtd} un. x ${formatCurrency(custo)} = ${formatCurrency(custo * qtd)}</p>
+                </div>
+                <button onclick="this.parentElement.remove(); window.atualizarCustoTotalKit();" class="text-red-500 hover:text-red-700 p-1"><i class="ph-bold ph-trash"></i></button>
+            `;
+            container.appendChild(itemDiv);
+            nomeInput.value = '';
+            custoInput.value = '';
+            qtdInput.value = '1';
+            nomeInput.focus();
+            atualizarCustoTotalKit();
+        }
+
+        function atualizarCustoTotalKit() {
+            let custoTotal = 0;
+            document.querySelectorAll('.kit-item').forEach(item => {
+                const custo = parseFloat(item.dataset.custo) || 0;
+                const qtd = parseInt(item.dataset.qtd) || 0;
+                custoTotal += custo * qtd;
+            });
+            document.getElementById('custoTotalKit').textContent = formatCurrency(custoTotal);
+        }
         
         function preencherExemplo() {
+            changeCalcMode('lucratividade');
+            changeSubCalcMode('unico');
             document.getElementById('custoProduto').value = 80;
             document.getElementById('frete').value = 15;
-            document.getElementById('impostos').value = 12;
-            document.getElementById('taxaPagamento').value = 4;
-            document.getElementById('comissao').value = 5;
-            document.getElementById('custoFixo').value = 0;
+            document.getElementById('impostosUnico').value = 12;
+            document.getElementById('taxaPagamentoUnico').value = 4;
+            document.getElementById('comissaoUnico').value = 5;
+            document.getElementById('custoFixoUnico').value = 0;
             document.getElementById('margemLucro').value = 25;
-            document.getElementById('precoVenda').value = ''; // Limpa o preço para forçar o cálculo
+            document.getElementById('precoVenda').value = ''; 
             analiseFinanceira('precificar');
         }
 
         function analiseFinanceira(modo) {
-            const custoProduto = parseFloat(document.getElementById('custoProduto').value) || 0;
-            const frete = parseFloat(document.getElementById('frete').value) || 0;
-            const percImpostos = parseFloat(document.getElementById('impostos').value) || 0;
-            const percTaxaPagamento = parseFloat(document.getElementById('taxaPagamento').value) || 0;
-            const percComissao = parseFloat(document.getElementById('comissao').value) || 0;
-            const percCustoFixo = parseFloat(document.getElementById('custoFixo').value) || 0;
+            let custoTotalDireto = 0;
+            let custoProduto = 0;
+            let percImpostos, percTaxaPagamento, percComissao, percCustoFixo;
+
+            if (currentSubCalcMode === 'unico') {
+                custoProduto = parseFloat(document.getElementById('custoProduto').value) || 0;
+                const frete = parseFloat(document.getElementById('frete').value) || 0;
+                custoTotalDireto = custoProduto + frete;
+                percImpostos = parseFloat(document.getElementById('impostosUnico').value) || 0;
+                percTaxaPagamento = parseFloat(document.getElementById('taxaPagamentoUnico').value) || 0;
+                percComissao = parseFloat(document.getElementById('comissaoUnico').value) || 0;
+                percCustoFixo = parseFloat(document.getElementById('custoFixoUnico').value) || 0;
+            } else { 
+                document.querySelectorAll('.kit-item').forEach(item => {
+                    custoProduto += (parseFloat(item.dataset.custo) || 0) * (parseInt(item.dataset.qtd) || 0);
+                });
+                custoTotalDireto = custoProduto;
+                percImpostos = parseFloat(document.getElementById('impostosKit').value) || 0;
+                percTaxaPagamento = parseFloat(document.getElementById('taxaPagamentoKit').value) || 0;
+                percComissao = parseFloat(document.getElementById('comissaoKit').value) || 0;
+                percCustoFixo = parseFloat(document.getElementById('custoFixoKit').value) || 0;
+            }
+            
             const precoVendaInput = document.getElementById('precoVenda');
             const margemLucroInput = document.getElementById('margemLucro');
             const res = document.getElementById('resultadoAnalise');
             const simulador = document.getElementById('simuladorNegociacao');
 
-            // Limpa resultados anteriores e esconde simulador
             res.innerHTML = '';
             simulador.classList.add('hidden');
             lastCalcState = {};
 
-            let precoVendaFinal = 0;
-            let margemLucroFinal = 0;
-
-            const custoTotalDireto = custoProduto + frete;
             if (custoTotalDireto <= 0) {
-                 res.innerHTML = `<p class="font-bold text-red-600 text-center py-10">O Custo do Produto + Frete deve ser maior que zero.</p>`;
+                 res.innerHTML = `<p class="font-bold text-red-600 text-center py-10">O Custo Total dos Itens deve ser maior que zero.</p>`;
                  return;
             }
 
             const totalPercentuaisVariaveis = percImpostos + percTaxaPagamento + percComissao + percCustoFixo;
+            let precoVendaFinal = 0;
+            let margemLucroFinal = 0;
 
             if (modo === 'precificar') {
                 const percLucroDesejado = parseFloat(margemLucroInput.value) || 0;
@@ -475,10 +962,10 @@
                 precoVendaFinal = custoTotalDireto / markupDivisor;
                 margemLucroFinal = percLucroDesejado;
                 precoVendaInput.value = precoVendaFinal.toFixed(2);
-            } else { // modo 'analisar'
+            } else { 
                 precoVendaFinal = parseFloat(precoVendaInput.value) || 0;
                 if (precoVendaFinal <= custoTotalDireto) {
-                     res.innerHTML = `<p class="font-bold text-red-600 text-center py-10">O preço de venda deve ser maior que a soma do custo do produto e frete.</p>`;
+                     res.innerHTML = `<p class="font-bold text-red-600 text-center py-10">O preço de venda deve ser maior que a soma dos custos.</p>`;
                     return;
                 }
                 const valorDespesasVariaveis = precoVendaFinal * (totalPercentuaisVariaveis / 100);
@@ -487,66 +974,164 @@
                 margemLucroInput.value = margemLucroFinal.toFixed(2);
             }
 
-            // --- Geração dos Resultados ---
             const valorImpostos = precoVendaFinal * (percImpostos / 100);
             const valorTaxaPagamento = precoVendaFinal * (percTaxaPagamento / 100);
             const valorComissao = precoVendaFinal * (percComissao / 100);
             const valorCustoFixo = precoVendaFinal * (percCustoFixo / 100);
             const lucroLiquidoFinal = precoVendaFinal - custoTotalDireto - valorImpostos - valorTaxaPagamento - valorComissao - valorCustoFixo;
-            
             const totalCustosDespesas = custoTotalDireto + valorImpostos + valorTaxaPagamento + valorComissao + valorCustoFixo;
             const markupMultiplicador = (custoProduto > 0) ? precoVendaFinal / custoProduto : 0;
-
-            const percCustoProduto = (precoVendaFinal > 0) ? (custoProduto / precoVendaFinal) * 100 : 0;
-            const percFrete = (precoVendaFinal > 0) ? (frete / precoVendaFinal) * 100 : 0;
+            const percCustoProduto = (precoVendaFinal > 0) ? (custoTotalDireto / precoVendaFinal) * 100 : 0;
             const percDespesasTotais = (precoVendaFinal > 0) ? (totalCustosDespesas - custoTotalDireto) / precoVendaFinal * 100 : 0;
             const percLucro = (precoVendaFinal > 0) ? (lucroLiquidoFinal / precoVendaFinal) * 100 : 0;
 
-             res.innerHTML = `
+            res.innerHTML = `
                 <h3 class="font-bold text-lg mb-4">Análise da Venda</h3>
-                <div class="space-y-4">
-                    <div>
-                        <p class="text-sm font-semibold text-gray-700 mb-2">Composição do Preço de Venda (${formatCurrency(precoVendaFinal)})</p>
-                        <div class="w-full bg-gray-200 rounded-full h-6 flex overflow-hidden">
-                            <div class="bg-slate-500 h-6 text-white text-xs flex items-center justify-center" style="width: ${percCustoProduto + percFrete}%" title="Custos Diretos: ${(percCustoProduto + percFrete).toFixed(1)}%">${(percCustoProduto + percFrete) > 10 ? (percCustoProduto + percFrete).toFixed(0)+'%' : ''}</div>
-                            <div class="bg-amber-500 h-6 text-white text-xs flex items-center justify-center" style="width: ${percDespesasTotais}%" title="Despesas: ${percDespesasTotais.toFixed(1)}%">${percDespesasTotais > 10 ? percDespesasTotais.toFixed(0)+'%' : ''}</div>
-                            <div class="bg-emerald-500 h-6 text-white text-xs flex items-center justify-center" style="width: ${percLucro}%" title="Lucro Líquido: ${percLucro.toFixed(1)}%">${percLucro > 10 ? percLucro.toFixed(0)+'%' : ''}</div>
-                        </div>
-                        <div class="flex flex-wrap justify-start gap-4 mt-2 text-xs">
-                            <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-slate-500"></span>Custos Diretos</div>
-                            <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500"></span>Despesas</div>
-                            <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500"></span>Lucro Líquido</div>
-                        </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-700 mb-2">Composição do Preço de Venda (${formatCurrency(precoVendaFinal)})</p>
+                    <div class="w-full bg-gray-200 rounded-full h-6 flex overflow-hidden">
+                        <div class="bg-slate-500 h-6 text-white text-xs flex items-center justify-center" style="width: ${percCustoProduto}%" title="Custos Diretos: ${percCustoProduto.toFixed(1)}%">${percCustoProduto > 10 ? percCustoProduto.toFixed(0)+'%' : ''}</div>
+                        <div class="bg-amber-500 h-6 text-white text-xs flex items-center justify-center" style="width: ${percDespesasTotais}%" title="Despesas: ${percDespesasTotais.toFixed(1)}%">${percDespesasTotais > 10 ? percDespesasTotais.toFixed(0)+'%' : ''}</div>
+                        <div class="bg-emerald-500 h-6 text-white text-xs flex items-center justify-center" style="width: ${percLucro}%" title="Lucro Líquido: ${percLucro.toFixed(1)}%">${percLucro > 10 ? percLucro.toFixed(0)+'%' : ''}</div>
                     </div>
-
-                    <div>
-                        <h4 class="font-semibold text-gray-800 mt-4 mb-2">Detalhamento dos Valores:</h4>
-                        <ul class="text-sm space-y-2 text-gray-700">
-                            <li class="flex justify-between border-b pb-1"><span>(-) Custo do Produto:</span> <span class="font-medium">${formatCurrency(custoProduto)}</span></li>
-                            <li class="flex justify-between border-b pb-1"><span>(-) Frete:</span> <span class="font-medium">${formatCurrency(frete)}</span></li>
-                            <li class="flex justify-between border-b pb-1"><span>(-) Impostos (${percImpostos.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorImpostos)}</span></li>
-                            <li class="flex justify-between border-b pb-1"><span>(-) Taxa de Pagamento (${percTaxaPagamento.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorTaxaPagamento)}</span></li>
-                            <li class="flex justify-between border-b pb-1"><span>(-) Comissão (${percComissao.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorComissao)}</span></li>
-                            <li class="flex justify-between border-b pb-1"><span>(-) Rateio Custo Fixo (${percCustoFixo.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorCustoFixo)}</span></li>
-                            <li class="flex justify-between pt-2 border-t mt-2 font-bold text-emerald-600"><span>(=) Lucro Líquido:</span> <span>${formatCurrency(lucroLiquidoFinal)}</span></li>
-                        </ul>
+                    <div class="flex flex-wrap justify-start gap-4 mt-2 text-xs">
+                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-slate-500"></span>Custos Diretos</div>
+                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500"></span>Despesas</div>
+                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500"></span>Lucro Líquido</div>
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                        <div class="indicator-card text-center"><p class="text-sm text-gray-500">Lucro Líquido</p><p class="text-2xl font-bold text-emerald-600">${formatCurrency(lucroLiquidoFinal)}</p></div>
-                        <div class="indicator-card text-center"><p class="text-sm text-gray-500">Margem de Lucro</p><p class="text-2xl font-bold text-blue-600">${margemLucroFinal.toFixed(2).replace('.', ',')}%</p></div>
-                        <div class="indicator-card text-center"><p class="text-sm text-gray-500">Custo Total da Venda</p><p class="text-2xl font-bold text-slate-600">${formatCurrency(totalCustosDespesas)}</p></div>
-                        <div class="indicator-card text-center"><p class="text-sm text-gray-500">Markup Multiplicador</p><p class="text-2xl font-bold text-indigo-600">${markupMultiplicador.toFixed(2)}x</p></div>
-                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 mt-4 mb-2">Detalhamento dos Valores:</h4>
+                    <ul class="text-sm space-y-2 text-gray-700">
+                        <li class="flex justify-between border-b pb-1"><span>(-) Custos Totais:</span> <span class="font-medium">${formatCurrency(custoTotalDireto)}</span></li>
+                        <li class="flex justify-between border-b pb-1"><span>(-) Impostos (${percImpostos.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorImpostos)}</span></li>
+                        <li class="flex justify-between border-b pb-1"><span>(-) Taxa de Pagamento (${percTaxaPagamento.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorTaxaPagamento)}</span></li>
+                        <li class="flex justify-between border-b pb-1"><span>(-) Comissão (${percComissao.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorComissao)}</span></li>
+                        <li class="flex justify-between border-b pb-1"><span>(-) Rateio Custo Fixo (${percCustoFixo.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorCustoFixo)}</span></li>
+                        <li class="flex justify-between pt-2 border-t mt-2 font-bold text-emerald-600"><span>(=) Lucro Líquido:</span> <span>${formatCurrency(lucroLiquidoFinal)}</span></li>
+                    </ul>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 mt-4">
+                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Lucro Líquido</p><p class="text-2xl font-bold text-emerald-600">${formatCurrency(lucroLiquidoFinal)}</p></div>
+                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Margem de Lucro</p><p class="text-2xl font-bold text-blue-600">${margemLucroFinal.toFixed(2).replace('.', ',')}%</p></div>
+                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Custo Total da Venda</p><p class="text-2xl font-bold text-slate-600">${formatCurrency(totalCustosDespesas)}</p></div>
+                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Markup Multiplicador</p><p class="text-2xl font-bold text-indigo-600">${markupMultiplicador.toFixed(2)}x</p></div>
                 </div>
             `;
             
-            // Armazena os dados do cálculo e exibe o simulador
-            lastCalcState = { precoVendaFinal, custoTotalDireto, totalPercentuaisVariaveis };
+            lastCalcState = { precoVendaFinal, custoTotalDireto, totalPercentuaisVariaveis, lucroLiquidoFinal, valorTaxaPagamento };
             simulador.classList.remove('hidden');
             document.getElementById('resultadoSimularDesconto').innerHTML = '';
+            document.getElementById('simularDescontoInput').value = '';
             document.getElementById('resultadoDescontoMaximo').innerHTML = '';
+            document.getElementById('descontoMaximoInput').value = '';
+            document.getElementById('resultadoParcelamento').innerHTML = '';
+            document.getElementById('numParcelasInput').value = '';
+            document.getElementById('taxaParcelamentoInput').value = '';
         }
+        
+        function usarUltimoPreco() {
+            if (lastCalcState.precoVendaFinal) {
+                document.getElementById('roiInvestimento').value = lastCalcState.precoVendaFinal.toFixed(2);
+            } else {
+                alert('Primeiro, calcule um preço na aba de Lucratividade para usar esta função.');
+            }
+        }
+
+        function calcularRoi() {
+            const investimento = parseFloat(document.getElementById('roiInvestimento').value) || 0;
+            const ganhosMensais = parseFloat(document.getElementById('roiGanhos').value) || 0;
+            const custoMensal = parseFloat(document.getElementById('roiCustoMensal').value) || 0;
+            const periodoAnalise = parseInt(document.getElementById('roiPeriodo').value) || 12;
+            const resDiv = document.getElementById('resultadoAnalise');
+
+            if (investimento <= 0 || ganhosMensais <= 0) {
+                resDiv.innerHTML = `<p class="font-bold text-red-600 text-center py-10">O Investimento e os Ganhos Mensais devem ser maiores que zero.</p>`;
+                return;
+            }
+
+            const ganhoLiquidoMensal = ganhosMensais - custoMensal;
+
+            if (ganhoLiquidoMensal <= 0) {
+                 resDiv.innerHTML = `<p class="font-bold text-amber-600 text-center py-10">O ganho mensal do cliente deve ser maior que o custo mensal da solução para haver retorno.</p>`;
+                return;
+            }
+
+            const paybackMeses = investimento / ganhoLiquidoMensal;
+            const ganhoTotalPeriodo = ganhoLiquidoMensal * periodoAnalise;
+            const lucroClientePeriodo = ganhoTotalPeriodo - investimento;
+            const roiPeriodo = (lucroClientePeriodo / investimento) * 100;
+
+            resDiv.innerHTML = `
+                <h3 class="font-bold text-lg mb-4 text-teal-700">Resultados de ROI para o Cliente</h3>
+                <div class="space-y-4">
+                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Tempo de Retorno (Payback)</p><p class="text-2xl font-bold text-teal-600">${paybackMeses.toFixed(1).replace('.',',')} meses</p></div>
+                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">ROI em ${periodoAnalise} Meses</p><p class="text-2xl font-bold text-teal-600">+${roiPeriodo.toFixed(2).replace('.',',')}%</p></div>
+                    <div class="indicator-card text-center"><p class="text-sm text-gray-500">Lucro do Cliente (em ${periodoAnalise} meses)</p><p class="text-2xl font-bold text-teal-600">${formatCurrency(lucroClientePeriodo)}</p></div>
+                </div>
+                 <p class="text-xs text-center text-gray-500 mt-4">"Com este investimento, em ${periodoAnalise} meses terá um retorno de ${roiPeriodo.toFixed(0)}% e um lucro de ${formatCurrency(lucroClientePeriodo)}."</p>
+            `;
+        }
+
+         function calcularTco() {
+            const resDiv = document.getElementById('resultadoAnalise');
+
+            const precoA = parseFloat(document.getElementById('tcoPrecoA').value) || 0;
+            const manutencaoA = parseFloat(document.getElementById('tcoManutencaoA').value) || 0;
+            const vidaUtilA = parseInt(document.getElementById('tcoVidaUtilA').value) || 1;
+
+            const precoB = parseFloat(document.getElementById('tcoPrecoB').value) || 0;
+            const manutencaoB = parseFloat(document.getElementById('tcoManutencaoB').value) || 0;
+            const vidaUtilB = parseInt(document.getElementById('tcoVidaUtilB').value) || 1;
+
+            if (precoA <= 0 || precoB <= 0) {
+                resDiv.innerHTML = `<p class="font-bold text-red-600 text-center py-10">O preço de compra de ambas as soluções deve ser maior que zero.</p>`;
+                return;
+            }
+
+            const periodo = Math.max(vidaUtilA, vidaUtilB);
+
+            const tcoA = precoA + (manutencaoA * vidaUtilA);
+            const tcoB = precoB + (manutencaoB * vidaUtilB);
+            
+            const custoAnualA = tcoA / vidaUtilA;
+            const custoAnualB = tcoB / vidaUtilB;
+            const tcoAjustadoA = custoAnualA * periodo;
+            const tcoAjustadoB = custoAnualB * periodo;
+
+            const economiaTotal = tcoAjustadoB - tcoAjustadoA;
+            
+            const maxTco = Math.max(tcoAjustadoA, tcoAjustadoB);
+            const percA = (tcoAjustadoA / maxTco) * 100;
+            const percB = (tcoAjustadoB / maxTco) * 100;
+
+            resDiv.innerHTML = `
+                <h3 class="font-bold text-lg mb-4 text-purple-700">Análise de Custo Total (TCO) em ${periodo} anos</h3>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-semibold">Sua Solução</span>
+                            <span class="font-bold text-blue-600">${formatCurrency(tcoAjustadoA)}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-5"><div class="bg-blue-600 h-5 rounded-full" style="width: ${percA}%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-semibold">Concorrente</span>
+                            <span class="font-bold text-gray-600">${formatCurrency(tcoAjustadoB)}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-5"><div class="bg-gray-500 h-5 rounded-full" style="width: ${percB}%"></div></div>
+                    </div>
+
+                    <div class="indicator-card text-center !mt-6 ${economiaTotal > 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}">
+                        <p class="text-sm ${economiaTotal > 0 ? 'text-emerald-800' : 'text-rose-800'}">Economia para o cliente em ${periodo} anos</p>
+                        <p class="text-3xl font-bold ${economiaTotal > 0 ? 'text-emerald-600' : 'text-rose-600'}">${formatCurrency(economiaTotal)}</p>
+                    </div>
+                </div>
+                 <p class="text-xs text-center text-gray-500 mt-4">"Embora o preço inicial possa ser diferente, ao longo de ${periodo} anos, a nossa solução representa uma economia de ${formatCurrency(economiaTotal)} para a sua empresa."</p>
+            `;
+        }
+
 
         function simularDesconto() {
             const { precoVendaFinal, custoTotalDireto, totalPercentuaisVariaveis } = lastCalcState;
@@ -604,6 +1189,57 @@
                 </div>
             `;
         }
+        
+        function calcularParcelamento() {
+            const { precoVendaFinal, lucroLiquidoFinal, valorTaxaPagamento } = lastCalcState;
+            if (!precoVendaFinal) return;
+
+            const resDiv = document.getElementById('resultadoParcelamento');
+            const numParcelas = parseInt(document.getElementById('numParcelasInput').value) || 1;
+            const taxaParcelamento = parseFloat(document.getElementById('taxaParcelamentoInput').value) || 0;
+            const quemPaga = document.querySelector('.quem-paga-btn.active').dataset.value;
+
+            if (numParcelas <= 0) {
+                resDiv.innerHTML = `<p class="text-red-600 font-semibold text-center mt-2">O número de parcelas deve ser maior que zero.</p>`;
+                return;
+            }
+
+            if (quemPaga === 'empresa') {
+                const valorParcela = precoVendaFinal / numParcelas;
+                const valorNovaTaxa = precoVendaFinal * (taxaParcelamento / 100);
+                const diferencaDeCusto = valorNovaTaxa - valorTaxaPagamento;
+                const novoLucro = lucroLiquidoFinal - diferencaDeCusto;
+                const novaMargem = (precoVendaFinal > 0) ? (novoLucro / precoVendaFinal) * 100 : 0;
+                const mudancaCustoTexto = diferencaDeCusto > 0 
+                    ? `<p class="text-xs text-center text-red-600 mt-2">Custo adicional da taxa: ${formatCurrency(diferencaDeCusto)}</p>` 
+                    : (diferencaDeCusto < 0 ? `<p class="text-xs text-center text-emerald-600 mt-2">Economia na taxa: ${formatCurrency(-diferencaDeCusto)}</p>` : '');
+
+                resDiv.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-center">
+                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Valor da Parcela</p><p class="font-bold text-cyan-600">${numParcelas}x de ${formatCurrency(valorParcela)}</p></div>
+                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Lucro Real</p><p class="font-bold ${novoLucro > 0 ? 'text-emerald-600' : 'text-red-600'}">${formatCurrency(novoLucro)}</p></div>
+                        <div class="bg-white p-2 rounded-md md:col-span-2"><p class="text-xs text-gray-500">Margem Real</p><p class="font-bold ${novaMargem > 0 ? 'text-blue-600' : 'text-red-600'}">${novaMargem.toFixed(2).replace('.',',')}%</p></div>
+                    </div>
+                    ${mudancaCustoTexto}
+                `;
+            } else { 
+                const valorTaxaAbsoluto = precoVendaFinal / (1 - (taxaParcelamento/100)) - precoVendaFinal;
+                const novoPrecoCliente = precoVendaFinal + valorTaxaAbsoluto;
+                const valorParcela = novoPrecoCliente / numParcelas;
+                
+                resDiv.innerHTML = `
+                    <div class="bg-white p-2 rounded-md text-center">
+                        <p class="text-xs text-gray-500">Novo Preço Final (p/ Cliente)</p>
+                        <p class="font-bold text-indigo-600">${formatCurrency(novoPrecoCliente)}</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 text-center">
+                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Valor da Parcela</p><p class="font-bold text-cyan-600">${numParcelas}x de ${formatCurrency(valorParcela)}</p></div>
+                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Lucro (Empresa)</p><p class="font-bold text-emerald-600">${formatCurrency(lucroLiquidoFinal)}</p></div>
+                    </div>
+                    <p class="text-xs text-center text-emerald-600 mt-2">Seu lucro e margem originais são mantidos!</p>
+                `;
+            }
+        }
 
 
         function gerarScript() {
@@ -618,11 +1254,9 @@
         }
 
         // --- LÓGICA DO FUNIL KANBAN MODERNO ---
-        let cardIdCounter = 0;
         function updateIndicators() {
             let activeValue = 0, wonValue = 0, lostValue = 0, weightedValue = 0;
             let activeCardsCount = 0, wonCardsCount = 0, lostCardsCount = 0;
-            
             const activeColumns = ['prospect', 'qualify', 'proposal', 'negotiate'];
             const probabilities = { prospect: 0.10, qualify: 0.30, proposal: 0.60, negotiate: 0.80 };
 
@@ -655,27 +1289,28 @@
             document.getElementById('weighted-value').textContent = formatCurrency(weightedValue);
             document.getElementById('won-value').textContent = formatCurrency(wonValue);
             document.getElementById('lost-value').textContent = formatCurrency(lostValue);
-            
             const averageTicket = wonCardsCount > 0 ? wonValue / wonCardsCount : 0;
             document.getElementById('average-ticket').textContent = formatCurrency(averageTicket);
-            
             const totalClosed = wonCardsCount + lostCardsCount;
             const conversionRate = totalClosed > 0 ? (wonCardsCount / totalClosed) * 100 : 0;
             document.getElementById('conversion-rate').textContent = `${conversionRate.toFixed(1).replace('.',',')}%`;
         }
-
+        
         function addCard() {
             const input = document.getElementById('newCardInput');
             const text = input.value.trim();
             if (text === '') return;
             const card = document.createElement('div');
-            cardIdCounter++;
-            card.className = 'kanban-card'; card.draggable = true; card.id = 'card-' + cardIdCounter;
-            card.innerHTML = `<span class="card-title">${text}</span><div class="card-value"><span class="text-gray-500 text-sm">R$</span><input type="number" step="0.01" class="card-value-input" placeholder="0,00" oninput="updateIndicators()"></div>`;
+            window.cardIdCounter++;
+            card.className = 'kanban-card'; card.draggable = true; card.id = 'card-' + window.cardIdCounter;
+            card.innerHTML = `<span class="card-title">${text}</span><div class="card-value"><span class="text-gray-500 text-sm">R$</span><input type="number" step="0.01" class="card-value-input" placeholder="0,00" oninput="window.updateIndicators(); window.saveKanbanState();"></div>`;
             addCardEventListeners(card);
             document.querySelector('[data-column="prospect"] .kanban-cards').appendChild(card);
-            input.value = ''; updateIndicators();
+            input.value = ''; 
+            updateIndicators();
+            saveKanbanState();
         }
+        
         function addCardEventListeners(card){
             card.addEventListener('dragstart', (e) => { 
                 draggedCard = e.target;
@@ -688,25 +1323,112 @@
                 draggedCard = null;
             });
         }
-        document.querySelectorAll('.kanban-cards').forEach(column => {
-            column.addEventListener('dragover', e => { e.preventDefault(); 
-                const container = e.currentTarget;
-                container.classList.add('drag-over');
+        
+        // --- Expor funções para o escopo global ---
+        window.changeTab = changeTab;
+        window.changeCalcMode = changeCalcMode;
+        window.changeSubCalcMode = changeSubCalcMode;
+        window.adicionarItemKit = adicionarItemKit;
+        window.atualizarCustoTotalKit = atualizarCustoTotalKit;
+        window.preencherExemplo = preencherExemplo;
+        window.analiseFinanceira = analiseFinanceira;
+        window.usarUltimoPreco = usarUltimoPreco;
+        window.calcularRoi = calcularRoi;
+        window.calcularTco = calcularTco;
+        window.simularDesconto = simularDesconto;
+        window.calcularDescontoMaximo = calcularDescontoMaximo;
+        window.calcularParcelamento = calcularParcelamento;
+        window.gerarScript = gerarScript;
+        window.addCard = addCard;
+        window.updateIndicators = updateIndicators;
+        window.saveKanbanState = saveKanbanState;
+        window.debounceSaveNotes = debounceSaveNotes;
+
+        function resetUIState() {
+            document.querySelectorAll('.kanban-cards').forEach(col => col.innerHTML = '');
+            updateIndicators();
+            const noteIds = ['concorrente1_nome', 'concorrente1_fortes', 'concorrente1_fracos', 'concorrente2_nome', 'concorrente2_fortes', 'concorrente2_fracos', 'concorrente3_nome', 'concorrente3_fortes', 'concorrente3_fracos', 'anotacoes_cliente'];
+            noteIds.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = '';
             });
-            column.addEventListener('dragleave', e => { 
-                 e.currentTarget.classList.remove('drag-over');
+            document.getElementById('resultadoAnalise').innerHTML = '<p class="text-gray-500 text-center py-10">Preencha os campos e calcule para ver os resultados.</p>';
+            document.getElementById('simuladorNegociacao').classList.add('hidden');
+            lastCalcState = {};
+        }
+        
+        // --- Inicialização ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                resetUIState();
+                userId = user.uid;
+                document.getElementById('authOverlay').classList.add('hidden');
+                document.getElementById('appContent').classList.remove('hidden');
+                document.getElementById('userEmailDisplay').textContent = user.email;
+                document.getElementById('userSection').classList.remove('hidden');
+                updateStatus('Conectado', 'text-blue-600');
+
+                kanbanUnsubscribe();
+                const kanbanDocRef = doc(db, `users/${userId}/kanban/boardState`);
+                kanbanUnsubscribe = onSnapshot(kanbanDocRef, (docSnap) => {
+                    loadKanbanState(docSnap.data());
+                    updateStatus('Funil sincronizado', 'text-green-600', false);
+                });
+
+                notesUnsubscribe();
+                const notesDocRef = doc(db, `users/${userId}/notes/allNotes`);
+                notesUnsubscribe = onSnapshot(notesDocRef, (docSnap) => {
+                    loadNotesState(docSnap.data());
+                     updateStatus('Anotações sincronizadas', 'text-green-600', false);
+                });
+            } else {
+                userId = null;
+                document.getElementById('authOverlay').classList.remove('hidden');
+                document.getElementById('appContent').classList.add('hidden');
+                kanbanUnsubscribe();
+                notesUnsubscribe();
+                resetUIState();
+            }
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loginButton').addEventListener('click', handleLogin);
+            document.getElementById('registerButton').addEventListener('click', handleRegister);
+            document.getElementById('logoutButton').addEventListener('click', handleLogout);
+            document.getElementById('showRegister').addEventListener('click', toggleAuthForms);
+            document.getElementById('showLogin').addEventListener('click', toggleAuthForms);
+
+            changeCalcMode('lucratividade'); 
+            changeSubCalcMode('unico');
+            const quemPagaContainer = document.getElementById('quemPagaTaxaContainer');
+            quemPagaContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('quem-paga-btn')) {
+                    quemPagaContainer.querySelectorAll('.quem-paga-btn').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                }
             });
-            column.addEventListener('drop', e => { 
-                e.preventDefault(); 
-                const container = e.currentTarget;
-                if (draggedCard && container.contains(draggedCard) === false) { 
-                    container.appendChild(draggedCard); 
-                    updateIndicators(); 
-                } 
-                container.classList.remove('drag-over'); 
+            
+             document.querySelectorAll('.kanban-cards').forEach(column => {
+                column.addEventListener('dragover', e => { e.preventDefault(); 
+                    const container = e.currentTarget;
+                    container.classList.add('drag-over');
+                });
+                column.addEventListener('dragleave', e => { 
+                    e.currentTarget.classList.remove('drag-over');
+                });
+                column.addEventListener('drop', e => { 
+                    e.preventDefault(); 
+                    const container = e.currentTarget;
+                    if (draggedCard && container.contains(draggedCard) === false) { 
+                        container.appendChild(draggedCard); 
+                        updateIndicators();
+                        saveKanbanState();
+                    } 
+                    container.classList.remove('drag-over'); 
+                });
             });
         });
-        document.addEventListener('DOMContentLoaded', updateIndicators);
+
     </script>
 </body>
 </html>
