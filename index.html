@@ -75,6 +75,7 @@
             transition: background-color 0.2s;
         }
         .kanban-card {
+            position: relative; /* Adicionado para o botão de apagar */
             background-color: white;
             padding: 1rem;
             border-radius: 0.5rem;
@@ -710,7 +711,7 @@
         // Importa as funções do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, setDoc, collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, setDoc, collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, limit, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
         // --- Variáveis Globais de Estado e Firebase ---
         let app, auth, db, appId, userId;
@@ -897,6 +898,7 @@
                             card.dataset.createdAt = cardData.createdAt;
                             card.dataset.stageHistory = JSON.stringify(cardData.stageHistory);
                              card.innerHTML = `
+                                <button onclick="window.deleteCard('${cardData.id}')" class="absolute top-2 right-2 text-gray-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-red-50 z-10"><i class="ph ph-trash"></i></button>
                                 <input type="text" class="card-title-input font-semibold w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-1 -mx-1" value="${cardData.title || ''}" onblur="window.saveKanbanState()">
                                 <div class="mt-2 space-y-2 text-sm">
                                     <div class="flex items-center gap-2"><i class="ph ph-buildings text-gray-500"></i><input type="text" class="card-company-input card-details-input" placeholder="Empresa" value="${cardData.company || ''}" onblur="window.saveKanbanState()"></div>
@@ -1548,7 +1550,8 @@
 
             window.cardIdCounter++;
             const newCard = document.createElement('div');
-            newCard.id = `card-${window.cardIdCounter}`;
+            const newCardId = `card-${window.cardIdCounter}`;
+            newCard.id = newCardId;
             newCard.className = 'kanban-card';
             newCard.draggable = true;
             const now = new Date().toISOString();
@@ -1556,6 +1559,7 @@
             newCard.dataset.stageHistory = JSON.stringify([{ stage: 'prospect', movedAt: now }]);
 
             newCard.innerHTML = `
+                <button onclick="window.deleteCard('${newCardId}')" class="absolute top-2 right-2 text-gray-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-red-50 z-10"><i class="ph ph-trash"></i></button>
                 <input type="text" class="card-title-input font-semibold w-full bg-transparent" value="${title}" onblur="window.saveKanbanState()">
                 <div class="mt-2 space-y-2 text-sm">
                     <div class="flex items-center gap-2"><i class="ph ph-buildings text-gray-500"></i><input type="text" class="card-company-input card-details-input" placeholder="Empresa" onblur="window.saveKanbanState()"></div>
@@ -1577,6 +1581,21 @@
             input.value = '';
             updateIndicators();
             saveKanbanState();
+        }
+
+        async function deleteCard(cardId) {
+            const card = document.getElementById(cardId);
+            if (!card) return;
+
+            const stage = card.parentElement.parentElement.dataset.column;
+
+            if (stage === 'won') {
+                await removeWonDeal(cardId);
+            }
+
+            card.remove();
+            updateIndicators();
+            await saveKanbanState();
         }
 
         function addCardEventListeners(card) {
@@ -1759,6 +1778,7 @@
         async function addWonDeal(card) {
              if (!userId || !auth.currentUser) return;
             const dealData = {
+                cardId: card.id,
                 title: card.querySelector('.card-title-input').value,
                 value: parseCurrency(card.querySelector('.card-value-input').value),
                 sellerId: userId,
@@ -1767,11 +1787,36 @@
             };
             try {
                 const wonDealsCol = collection(db, `artifacts/${appId}/public/data/wonDeals`);
-                await addDoc(wonDealsCol, dealData);
+                const q = query(wonDealsCol, where("cardId", "==", card.id));
+                const querySnapshot = await getDocs(q);
+                if (querySnapshot.empty) {
+                    await addDoc(wonDealsCol, dealData);
+                }
             } catch (error) {
                 console.error("Erro ao adicionar venda ganha:", error);
             }
         }
+
+        async function removeWonDeal(cardId) {
+            if (!userId) return;
+            try {
+                const wonDealsCol = collection(db, `artifacts/${appId}/public/data/wonDeals`);
+                // Query mais segura: só busca por vendas ganhas que pertencem ao usuário atual
+                const q = query(wonDealsCol, where("cardId", "==", cardId), where("sellerId", "==", userId));
+                const querySnapshot = await getDocs(q);
+                
+                const deletePromises = [];
+                querySnapshot.forEach((doc) => {
+                    deletePromises.push(deleteDoc(doc.ref));
+                });
+                
+                await Promise.all(deletePromises);
+
+            } catch (error) {
+                console.error("Erro ao remover venda ganha. Verifique as regras de segurança do Firestore.", error);
+            }
+        }
+
 
         // --- Inicialização da Aplicação ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -1788,6 +1833,7 @@
             window.calcularParcelamento = calcularParcelamento;
             window.gerarPlanoAcao = gerarPlanoAcao;
             window.addCard = addCard;
+            window.deleteCard = deleteCard;
             window.saveKanbanState = saveKanbanState;
             window.updateIndicators = updateIndicators;
             window.debounceSaveNotes = debounceSaveNotes;
@@ -1823,6 +1869,7 @@
                     const cardsContainer = column.querySelector('.kanban-cards');
                     cardsContainer.classList.remove('drag-over');
                     if (draggedCard) {
+                        const originalStage = draggedCard.parentElement.parentElement.dataset.column;
                         cardsContainer.appendChild(draggedCard);
                         
                         const newStage = column.dataset.column;
@@ -1830,9 +1877,14 @@
                         stageHistory.push({ stage: newStage, movedAt: new Date().toISOString() });
                         draggedCard.dataset.stageHistory = JSON.stringify(stageHistory);
                         
-                        // Se o card foi movido para "Ganho", registra a venda
-                        if (newStage === 'won') {
-                           await addWonDeal(draggedCard);
+                        // Se o card foi movido PARA "Ganho"
+                        if (newStage === 'won' && originalStage !== 'won') {
+                            await addWonDeal(draggedCard);
+                        }
+                        
+                        // Se o card foi movido DE "Ganho"
+                        if (originalStage === 'won' && newStage !== 'won') {
+                           await removeWonDeal(draggedCard.id);
                         }
 
                         updateIndicators();
@@ -1912,3 +1964,4 @@
     </script>
 </body>
 </html>
+
