@@ -456,6 +456,22 @@
                         <h2 class="text-3xl font-bold mb-2">Funil de Vendas Pessoal</h2>
                         <p class="text-gray-600 mb-6">Arraste os negócios entre as fases para atualizar seu pipeline. Seus dados são salvos automaticamente.</p>
                         
+                        <div class="bg-white p-4 rounded-lg shadow-md border mb-8">
+                            <label for="metaInput" class="block text-sm font-medium text-gray-700">Defina sua Meta de Vendas (R$)</label>
+                            <input type="text" id="metaInput" class="mt-1 w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded-md" placeholder="Ex: 50000" oninput="window.formatInputCurrency(this); window.debounceSaveGoal();">
+                            <div class="mt-4">
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-base font-medium text-blue-700">Progresso da Meta</span>
+                                    <span id="goalPercentage" class="text-sm font-medium text-blue-700">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-4">
+                                    <div id="goalProgressBar" class="bg-blue-600 h-4 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <p id="goalRemaining" class="text-sm text-gray-600 text-right mt-2"></p>
+                            </div>
+                        </div>
+
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                             <div class="indicator-card flex items-start gap-4 p-5">
                                 <div class="bg-blue-100 text-blue-600 p-3 rounded-lg"><i class="ph-bold ph-chart-line-up text-2xl"></i></div>
@@ -619,7 +635,9 @@
         let userId = null;
         let kanbanUnsubscribe = () => {};
         let notesUnsubscribe = () => {};
+        let goalUnsubscribe = () => {};
         let saveNotesTimeout;
+        let saveGoalTimeout;
 
         // --- Funções de Lógica do Firebase (autenticação) ---
         function handleLogin() {
@@ -783,6 +801,32 @@
                 document.getElementById('concorrente3_fracos').value = data.concorrente3_fracos || '';
                 document.getElementById('anotacoes_cliente').value = data.anotacoes_cliente || '';
              }
+        }
+
+        async function saveGoalState() {
+            if (!userId) return;
+            updateStatus('A salvar meta...', 'text-yellow-600');
+            const metaValue = parseCurrency(document.getElementById('metaInput').value);
+            const goalDocRef = doc(db, `users/${userId}/settings/goal`);
+            try {
+                await setDoc(goalDocRef, { value: metaValue });
+                updateStatus('Salvo', 'text-green-600', false);
+            } catch (error) {
+                console.error("Erro ao salvar a meta:", error);
+                updateStatus('Erro ao salvar', 'text-red-600', false);
+            }
+        }
+
+        function debounceSaveGoal() {
+            clearTimeout(saveGoalTimeout);
+            saveGoalTimeout = setTimeout(saveGoalState, 1500);
+        }
+
+        function loadGoalState(data) {
+            if (data && data.value) {
+                document.getElementById('metaInput').value = formatCurrency(data.value);
+            }
+            updateIndicators();
         }
         
         // --- Funções da Aplicação ---
@@ -1273,6 +1317,7 @@
             const totalClosed = wonCardsCount + lostCardsCount;
             const conversionRate = totalClosed > 0 ? (wonCardsCount / totalClosed) * 100 : 0;
             document.getElementById('conversion-rate').textContent = `${conversionRate.toFixed(1).replace('.',',')}%`;
+            updateGoalProgress(wonValue);
         }
         
         function addCard() {
@@ -1332,6 +1377,31 @@
             if (typeof value === 'number') return value;
             return Number(String(value).replace(/[^0-9,-]+/g,"").replace(",", ".")) || 0;
         }
+
+        function updateGoalProgress(wonValue) {
+            const metaInput = document.getElementById('metaInput');
+            const progressBar = document.getElementById('goalProgressBar');
+            const percentageText = document.getElementById('goalPercentage');
+            const remainingText = document.getElementById('goalRemaining');
+            const meta = parseCurrency(metaInput.value);
+
+            if (meta > 0) {
+                const percentage = Math.min((wonValue / meta) * 100, 100);
+                progressBar.style.width = `${percentage}%`;
+                percentageText.textContent = `${percentage.toFixed(0)}%`;
+                
+                const remaining = meta - wonValue;
+                if (remaining > 0) {
+                    remainingText.textContent = `Falta atingir: ${formatCurrency(remaining)}`;
+                } else {
+                    remainingText.textContent = "Meta atingida! Parabéns!";
+                }
+            } else {
+                progressBar.style.width = '0%';
+                percentageText.textContent = '0%';
+                remainingText.textContent = 'Defina uma meta para acompanhar.';
+            }
+        }
         
         // --- Expor funções para o escopo global ---
         window.changeTab = changeTab;
@@ -1352,6 +1422,7 @@
         window.updateIndicators = updateIndicators;
         window.saveKanbanState = saveKanbanState;
         window.debounceSaveNotes = debounceSaveNotes;
+        window.debounceSaveGoal = debounceSaveGoal;
         window.formatInputCurrency = formatInputCurrency;
         window.parseCurrency = parseCurrency;
 
@@ -1365,6 +1436,8 @@
             });
             document.getElementById('resultadoAnalise').innerHTML = '<p class="text-gray-500 text-center py-10">Preencha os campos e calcule para ver os resultados.</p>';
             document.getElementById('simuladorNegociacao').classList.add('hidden');
+            document.getElementById('metaInput').value = '';
+            updateGoalProgress(0);
             lastCalcState = {};
         }
         
@@ -1392,12 +1465,20 @@
                     loadNotesState(docSnap.data());
                      updateStatus('Anotações sincronizadas', 'text-green-600', false);
                 });
+                
+                goalUnsubscribe();
+                const goalDocRef = doc(db, `users/${userId}/settings/goal`);
+                goalUnsubscribe = onSnapshot(goalDocRef, (docSnap) => {
+                    loadGoalState(docSnap.data());
+                });
+
             } else {
                 userId = null;
                 document.getElementById('authOverlay').classList.remove('hidden');
                 document.getElementById('appContent').classList.add('hidden');
                 kanbanUnsubscribe();
                 notesUnsubscribe();
+                goalUnsubscribe();
                 resetUIState();
             }
         });
