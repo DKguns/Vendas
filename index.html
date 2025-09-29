@@ -146,6 +146,11 @@
         details > summary::-webkit-details-marker { display: none; }
         details > summary::after { content: '+'; float: right; font-size: 1.5rem; font-weight: bold; }
         details[open] > summary::after { content: '−'; }
+
+        .task-item.completed span {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -220,6 +225,7 @@
                     <button onclick="window.changeTab(event, 'lucratividade')" class="tab-button active text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-calculator"></i>Calculadoras</button>
                     <button onclick="window.changeTab(event, 'script')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-scroll"></i>Gerador de Script</button>
                     <button onclick="window.changeTab(event, 'funil')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-funnel"></i>Funil de Vendas</button>
+                    <button onclick="window.changeTab(event, 'plano-acao')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-list-checks"></i>Plano de Ação</button>
                     <button onclick="window.changeTab(event, 'concorrencia')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-users-three"></i>Concorrência</button>
                     <button onclick="window.changeTab(event, 'estrategias')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-strategy"></i>Estratégias & Objeções</button>
                 </nav>
@@ -513,6 +519,20 @@
                         </div>
                     </div>
                 </div>
+                 <!-- Plano de Ação -->
+                <div id="plano-acao" class="tab-content">
+                     <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+                        <h2 class="text-3xl font-bold mb-2">Plano de Ação e Tarefas</h2>
+                        <p class="text-gray-600 mb-6">Organize suas atividades e próximos passos. Suas tarefas são salvas automaticamente.</p>
+                        <div class="flex flex-col md:flex-row gap-4 mb-6 border-b pb-6">
+                            <input type="text" id="newTaskInput" class="flex-grow px-4 py-2 border border-gray-300 rounded-lg shadow-sm" placeholder="Adicionar nova tarefa (Ex: Ligar para o cliente X)">
+                            <button onclick="window.addTask()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"><i class="ph-bold ph-plus-circle"></i> Adicionar Tarefa</button>
+                        </div>
+                        <div id="taskListContainer" class="space-y-3">
+                            <!-- Tarefas serão inseridas aqui -->
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Análise de Concorrência -->
                 <div id="concorrencia" class="tab-content">
@@ -636,6 +656,7 @@
         let kanbanUnsubscribe = () => {};
         let notesUnsubscribe = () => {};
         let goalUnsubscribe = () => {};
+        let taskUnsubscribe = () => {};
         let saveNotesTimeout;
         let saveGoalTimeout;
 
@@ -707,6 +728,8 @@
                         date: card.querySelector('.card-date-input').value,
                         notes: card.querySelector('.card-notes-input').value,
                         value: parseCurrency(card.querySelector('.card-value-input').value),
+                        createdAt: card.dataset.createdAt,
+                        stageHistory: JSON.parse(card.dataset.stageHistory)
                     });
                 });
                 boardState.columns[columnId] = cards;
@@ -734,6 +757,8 @@
                         boardState.columns[columnId].forEach(cardData => {
                             const card = document.createElement('div');
                             card.className = 'kanban-card'; card.draggable = true; card.id = cardData.id;
+                            card.dataset.createdAt = cardData.createdAt;
+                            card.dataset.stageHistory = JSON.stringify(cardData.stageHistory);
                              card.innerHTML = `
                                 <input type="text" class="card-title-input font-semibold w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-1 -mx-1" value="${cardData.title || ''}" onblur="window.saveKanbanState()">
                                 <div class="mt-2 space-y-2 text-sm">
@@ -745,6 +770,10 @@
                                 <div class="mt-3 pt-3 border-t">
                                     <label class="text-xs font-medium text-gray-500">Valor do Negócio</label>
                                     <input type="text" class="card-value-input" value="${formatCurrency(cardData.value || 0)}" placeholder="R$ 0,00" oninput="window.formatInputCurrency(this); window.updateIndicators();" onblur="window.saveKanbanState()">
+                                </div>
+                                <div class="mt-2 text-xs text-gray-400 flex justify-between">
+                                    <span class="card-created-date">${timeAgo(cardData.createdAt, 'Criado')}</span>
+                                    <span class="card-stage-time">${timeAgo(cardData.stageHistory[cardData.stageHistory.length - 1].movedAt, 'Nesta fase')}</span>
                                 </div>`;
                             addCardEventListeners(card);
                             columnEl.appendChild(card);
@@ -828,7 +857,48 @@
             }
             updateIndicators();
         }
-        
+
+        async function saveTasksState() {
+             if (!userId) return;
+            updateStatus('A salvar tarefas...', 'text-yellow-600');
+            const tasks = [];
+            document.querySelectorAll('#taskListContainer .task-item').forEach(taskEl => {
+                tasks.push({
+                    id: taskEl.id,
+                    text: taskEl.querySelector('span').textContent,
+                    completed: taskEl.classList.contains('completed')
+                });
+            });
+            const tasksDocRef = doc(db, `users/${userId}/tasks/taskList`);
+            try {
+                await setDoc(tasksDocRef, { tasks });
+                 updateStatus('Salvo', 'text-green-600', false);
+            } catch (error) {
+                console.error("Erro ao salvar tarefas:", error);
+                updateStatus('Erro ao salvar', 'text-red-600', false);
+            }
+        }
+
+        function loadTasksState(data) {
+            const taskListContainer = document.getElementById('taskListContainer');
+            taskListContainer.innerHTML = '';
+            if (data && data.tasks) {
+                data.tasks.forEach(taskData => {
+                    const taskEl = document.createElement('div');
+                    taskEl.id = taskData.id;
+                    taskEl.className = `task-item flex items-center justify-between p-3 bg-gray-50 rounded-lg border ${taskData.completed ? 'completed' : ''}`;
+                    taskEl.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" ${taskData.completed ? 'checked' : ''} class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" onclick="window.toggleTaskCompletion('${taskData.id}')">
+                            <span class="flex-grow">${taskData.text}</span>
+                        </div>
+                        <button onclick="window.deleteTask('${taskData.id}')" class="text-gray-400 hover:text-red-600"><i class="ph-bold ph-trash"></i></button>
+                    `;
+                    taskListContainer.appendChild(taskEl);
+                });
+            }
+        }
+
         // --- Funções da Aplicação ---
         
         function changeTab(event, tabId) {
@@ -1327,6 +1397,10 @@
             const card = document.createElement('div');
             window.cardIdCounter++;
             card.className = 'kanban-card'; card.draggable = true; card.id = 'card-' + window.cardIdCounter;
+            const now = new Date().toISOString();
+            card.dataset.createdAt = now;
+            card.dataset.stageHistory = JSON.stringify([{ stage: 'prospect', movedAt: now }]);
+
             card.innerHTML = `
                 <input type="text" class="card-title-input font-semibold w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-1 -mx-1" value="${text}" onblur="window.saveKanbanState()">
                 <div class="mt-2 space-y-2 text-sm">
@@ -1338,6 +1412,10 @@
                 <div class="mt-3 pt-3 border-t">
                     <label class="text-xs font-medium text-gray-500">Valor do Negócio</label>
                     <input type="text" class="card-value-input" placeholder="R$ 0,00" oninput="window.formatInputCurrency(this); window.updateIndicators();" onblur="window.saveKanbanState()">
+                </div>
+                <div class="mt-2 text-xs text-gray-400 flex justify-between">
+                    <span class="card-created-date">${timeAgo(now, 'Criado')}</span>
+                    <span class="card-stage-time">${timeAgo(now, 'Nesta fase')}</span>
                 </div>`;
             addCardEventListeners(card);
             document.querySelector('[data-column="prospect"] .kanban-cards').appendChild(card);
@@ -1402,6 +1480,56 @@
                 remainingText.textContent = 'Defina uma meta para acompanhar.';
             }
         }
+
+        function timeAgo(dateString, prefix = '') {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.round((now - date) / 1000);
+            const minutes = Math.round(seconds / 60);
+            const hours = Math.round(minutes / 60);
+            const days = Math.round(hours / 24);
+            
+            let text;
+            if (seconds < 60) text = `há ${seconds} seg`;
+            else if (minutes < 60) text = `há ${minutes} min`;
+            else if (hours < 24) text = `há ${hours}h`;
+            else text = `há ${days}d`;
+
+            return `${prefix} ${text}`;
+        }
+
+        function addTask() {
+            const input = document.getElementById('newTaskInput');
+            const text = input.value.trim();
+            if (text === '') return;
+
+            const taskListContainer = document.getElementById('taskListContainer');
+            const taskEl = document.createElement('div');
+            const taskId = 'task-' + Date.now();
+            taskEl.id = taskId;
+            taskEl.className = 'task-item flex items-center justify-between p-3 bg-gray-50 rounded-lg border';
+            taskEl.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" onclick="window.toggleTaskCompletion('${taskId}')">
+                    <span class="flex-grow">${text}</span>
+                </div>
+                <button onclick="window.deleteTask('${taskId}')" class="text-gray-400 hover:text-red-600"><i class="ph-bold ph-trash"></i></button>
+            `;
+            taskListContainer.appendChild(taskEl);
+            input.value = '';
+            saveTasksState();
+        }
+
+        function deleteTask(taskId) {
+            document.getElementById(taskId)?.remove();
+            saveTasksState();
+        }
+
+        function toggleTaskCompletion(taskId) {
+            document.getElementById(taskId)?.classList.toggle('completed');
+            saveTasksState();
+        }
         
         // --- Expor funções para o escopo global ---
         window.changeTab = changeTab;
@@ -1425,10 +1553,14 @@
         window.debounceSaveGoal = debounceSaveGoal;
         window.formatInputCurrency = formatInputCurrency;
         window.parseCurrency = parseCurrency;
+        window.addTask = addTask;
+        window.deleteTask = deleteTask;
+        window.toggleTaskCompletion = toggleTaskCompletion;
 
         function resetUIState() {
             document.querySelectorAll('.kanban-cards').forEach(col => col.innerHTML = '');
             updateIndicators();
+            document.getElementById('taskListContainer').innerHTML = '';
             const noteIds = ['concorrente1_nome', 'concorrente1_fortes', 'concorrente1_fracos', 'concorrente2_nome', 'concorrente2_fortes', 'concorrente2_fracos', 'concorrente3_nome', 'concorrente3_fortes', 'concorrente3_fracos', 'anotacoes_cliente'];
             noteIds.forEach(id => {
                 const el = document.getElementById(id);
@@ -1472,6 +1604,12 @@
                     loadGoalState(docSnap.data());
                 });
 
+                taskUnsubscribe();
+                const tasksDocRef = doc(db, `users/${userId}/tasks/taskList`);
+                taskUnsubscribe = onSnapshot(tasksDocRef, (docSnap) => {
+                    loadTasksState(docSnap.data());
+                });
+
             } else {
                 userId = null;
                 document.getElementById('authOverlay').classList.remove('hidden');
@@ -1479,6 +1617,7 @@
                 kanbanUnsubscribe();
                 notesUnsubscribe();
                 goalUnsubscribe();
+                taskUnsubscribe();
                 resetUIState();
             }
         });
@@ -1511,8 +1650,12 @@
                 column.addEventListener('drop', e => { 
                     e.preventDefault(); 
                     const container = e.currentTarget;
+                    const columnId = container.closest('.kanban-column').dataset.column;
                     if (draggedCard && container.contains(draggedCard) === false) { 
-                        container.appendChild(draggedCard); 
+                        container.appendChild(draggedCard);
+                        let stageHistory = JSON.parse(draggedCard.dataset.stageHistory);
+                        stageHistory.push({ stage: columnId, movedAt: new Date().toISOString() });
+                        draggedCard.dataset.stageHistory = JSON.stringify(stageHistory);
                         updateIndicators();
                         saveKanbanState();
                     } 
