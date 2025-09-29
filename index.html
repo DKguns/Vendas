@@ -86,28 +86,29 @@
         .kanban-card:active { cursor: grabbing; }
         .kanban-card.dragging { opacity: 0.5; transform: rotate(2deg); }
         .drag-over { background-color: #e0e7ff !important; }
-
-        .card-title { font-weight: 500; display: block; margin-bottom: 0.75rem; }
-        .card-value { display: flex; align-items: center; gap: 0.25rem; }
-        .card-value-input {
-            width: 100%;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.375rem;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.875rem;
-            -moz-appearance: textfield;
+        
+        .card-title-input {
+            font-size: 1.1rem; border: none; outline: none;
+            padding: 2px; margin: -2px; width: calc(100% + 4px);
         }
-        .card-value-input::-webkit-outer-spin-button,
-        .card-value-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+        .card-details-input {
+            width: 100%; font-size: 0.875rem; border: none;
+            outline: none; background-color: transparent; padding: 2px;
+        }
+        .card-details-input:focus, .card-title-input:focus {
+            background-color: #f8fafc;
+            box-shadow: 0 0 0 1px #3b82f6;
+            border-radius: 0.25rem;
+        }
+        textarea.card-details-input { resize: vertical; }
+
+        .card-value-input {
+            width: 100%; border: none; border-radius: 0.375rem; padding: 0.25rem 0.5rem;
+            font-size: 1.125rem; font-weight: 700;
         }
         .indicator-card {
-            background-color: white;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.07);
-            border: 1px solid #e2e8f0;
+            background-color: white; padding: 1rem; border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.07); border: 1px solid #e2e8f0;
         }
         
         /* Estilos para Tooltip */
@@ -122,62 +123,25 @@
             margin-left: 6px;
         }
         .tooltip-text {
-            visibility: hidden;
-            width: 250px;
-            background-color: #1e293b;
-            color: #fff;
-            text-align: left;
-            border-radius: 6px;
-            padding: 8px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -125px; /* Metade da largura */
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.8rem;
-            line-height: 1.4;
+            visibility: hidden; width: 250px; background-color: #1e293b; color: #fff; text-align: left;
+            border-radius: 6px; padding: 8px; position: absolute; z-index: 1; bottom: 125%; left: 50%;
+            margin-left: -125px; opacity: 0; transition: opacity 0.3s; font-size: 0.8rem; line-height: 1.4;
         }
         .tooltip-text::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #1e293b transparent transparent transparent;
+            content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px;
+            border-style: solid; border-color: #1e293b transparent transparent transparent;
         }
-        .tooltip-container:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
+        .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
         .quem-paga-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            font-weight: 500;
+            padding: 0.5rem 1rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; cursor: pointer;
+            transition: all 0.2s ease-in-out; font-weight: 500;
         }
-        .quem-paga-btn.active {
-            background-color: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-        }
+        .quem-paga-btn.active { background-color: #3b82f6; color: white; border-color: #3b82f6; }
         .calc-mode-btn {
-            flex: 1;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
+            flex: 1; padding: 0.5rem; border-radius: 0.5rem; font-weight: 600;
             transition: all 0.2s ease-in-out;
         }
-        .calc-mode-btn.active {
-            background-color: #3b82f6;
-            color: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
+        .calc-mode-btn.active { background-color: #3b82f6; color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
         details > summary::after { content: '+'; float: right; font-size: 1.5rem; font-weight: bold; }
@@ -719,7 +683,11 @@
                 column.querySelectorAll('.kanban-card').forEach(card => {
                     cards.push({
                         id: card.id,
-                        title: card.querySelector('.card-title').textContent,
+                        title: card.querySelector('.card-title-input').value,
+                        company: card.querySelector('.card-company-input').value,
+                        contact: card.querySelector('.card-contact-input').value,
+                        date: card.querySelector('.card-date-input').value,
+                        notes: card.querySelector('.card-notes-input').value,
                         value: parseCurrency(card.querySelector('.card-value-input').value),
                     });
                 });
@@ -748,7 +716,18 @@
                         boardState.columns[columnId].forEach(cardData => {
                             const card = document.createElement('div');
                             card.className = 'kanban-card'; card.draggable = true; card.id = cardData.id;
-                            card.innerHTML = `<span class="card-title">${cardData.title}</span><div class="card-value"><input type="text" class="card-value-input" value="${formatCurrency(cardData.value || 0)}" placeholder="R$ 0,00" oninput="window.formatInputCurrency(this); window.updateIndicators();" onblur="window.saveKanbanState()"></div>`;
+                             card.innerHTML = `
+                                <input type="text" class="card-title-input font-semibold w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-1 -mx-1" value="${cardData.title || ''}" onblur="window.saveKanbanState()">
+                                <div class="mt-2 space-y-2 text-sm">
+                                    <div class="flex items-center gap-2"><i class="ph ph-buildings text-gray-500"></i><input type="text" class="card-company-input card-details-input" placeholder="Empresa" value="${cardData.company || ''}" onblur="window.saveKanbanState()"></div>
+                                    <div class="flex items-center gap-2"><i class="ph ph-user text-gray-500"></i><input type="text" class="card-contact-input card-details-input" placeholder="Contato" value="${cardData.contact || ''}" onblur="window.saveKanbanState()"></div>
+                                    <div class="flex items-center gap-2"><i class="ph ph-calendar text-gray-500"></i><input type="text" class="card-date-input card-details-input" placeholder="Data (dd/mm/aa)" value="${cardData.date || ''}" onblur="window.saveKanbanState()"></div>
+                                    <div class="flex items-start gap-2"><i class="ph ph-note-pencil text-gray-500 mt-1"></i><textarea class="card-notes-input card-details-input h-16" placeholder="Anotações..." onblur="window.saveKanbanState()">${cardData.notes || ''}</textarea></div>
+                                </div>
+                                <div class="mt-3 pt-3 border-t">
+                                    <label class="text-xs font-medium text-gray-500">Valor do Negócio</label>
+                                    <input type="text" class="card-value-input" value="${formatCurrency(cardData.value || 0)}" placeholder="R$ 0,00" oninput="window.formatInputCurrency(this); window.updateIndicators();" onblur="window.saveKanbanState()">
+                                </div>`;
                             addCardEventListeners(card);
                             columnEl.appendChild(card);
                             const currentId = parseInt(cardData.id.split('-')[1]);
@@ -1303,7 +1282,18 @@
             const card = document.createElement('div');
             window.cardIdCounter++;
             card.className = 'kanban-card'; card.draggable = true; card.id = 'card-' + window.cardIdCounter;
-            card.innerHTML = `<span class="card-title">${text}</span><div class="card-value"><input type="text" class="card-value-input" placeholder="R$ 0,00" oninput="window.formatInputCurrency(this); window.updateIndicators();" onblur="window.saveKanbanState()"></div>`;
+            card.innerHTML = `
+                <input type="text" class="card-title-input font-semibold w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-1 -mx-1" value="${text}" onblur="window.saveKanbanState()">
+                <div class="mt-2 space-y-2 text-sm">
+                    <div class="flex items-center gap-2"><i class="ph ph-buildings text-gray-500"></i><input type="text" class="card-company-input card-details-input" placeholder="Empresa" onblur="window.saveKanbanState()"></div>
+                    <div class="flex items-center gap-2"><i class="ph ph-user text-gray-500"></i><input type="text" class="card-contact-input card-details-input" placeholder="Contato" onblur="window.saveKanbanState()"></div>
+                    <div class="flex items-center gap-2"><i class="ph ph-calendar text-gray-500"></i><input type="text" class="card-date-input card-details-input" placeholder="Data (dd/mm/aa)" onblur="window.saveKanbanState()"></div>
+                    <div class="flex items-start gap-2"><i class="ph ph-note-pencil text-gray-500 mt-1"></i><textarea class="card-notes-input card-details-input h-16" placeholder="Anotações..." onblur="window.saveKanbanState()"></textarea></div>
+                </div>
+                <div class="mt-3 pt-3 border-t">
+                    <label class="text-xs font-medium text-gray-500">Valor do Negócio</label>
+                    <input type="text" class="card-value-input" placeholder="R$ 0,00" oninput="window.formatInputCurrency(this); window.updateIndicators();" onblur="window.saveKanbanState()">
+                </div>`;
             addCardEventListeners(card);
             document.querySelector('[data-column="prospect"] .kanban-cards').appendChild(card);
             input.value = ''; 
