@@ -146,7 +146,7 @@
         details > summary::-webkit-details-marker { display: none; }
         details > summary::after { content: '+'; float: right; font-size: 1.5rem; font-weight: bold; }
         details[open] > summary::after { content: '−'; }
-
+        
         .task-item.completed span {
             text-decoration: line-through;
             color: #9ca3af;
@@ -223,11 +223,10 @@
             <div class="mb-8 border-b border-gray-200">
                 <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
                     <button onclick="window.changeTab(event, 'lucratividade')" class="tab-button active text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-calculator"></i>Calculadoras</button>
-                    <button onclick="window.changeTab(event, 'script')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-scroll"></i>Gerador de Script</button>
                     <button onclick="window.changeTab(event, 'funil')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-funnel"></i>Funil de Vendas</button>
                     <button onclick="window.changeTab(event, 'plano-acao')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-list-checks"></i>Plano de Ação</button>
                     <button onclick="window.changeTab(event, 'concorrencia')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-users-three"></i>Concorrência</button>
-                    <button onclick="window.changeTab(event, 'estrategias')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-strategy"></i>Estratégias & Objeções</button>
+                    <button onclick="window.changeTab(event, 'estrategias')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-strategy"></i>Estratégias e Scripts</button>
                 </nav>
             </div>
 
@@ -277,24 +276,25 @@
                                 <!-- MODO PROPOSTA (KIT) -->
                                 <div id="calcModoKit" class="hidden">
                                     <h3 class="font-semibold text-lg border-b pb-2">1. Itens da Proposta</h3>
-                                    <div id="itensKitContainer" class="space-y-3 mt-4 max-h-48 overflow-y-auto pr-2">
+                                    <div id="itensKitContainer" class="space-y-3 mt-4 max-h-60 overflow-y-auto pr-2">
                                         <!-- Itens adicionados dinamicamente aqui -->
                                     </div>
-                                    <div class="flex gap-2 mt-4 p-2 bg-gray-50 rounded-md items-end">
-                                        <div class="flex-grow"><label class="text-xs font-medium">Nome do Item</label><input type="text" id="kitItemNome" placeholder="Ex: Produto A" class="mt-1 w-full px-2 py-1 border border-gray-300 rounded-md"></div>
-                                        <div class="w-28"><label class="text-xs font-medium">Custo (R$)</label><input type="number" id="kitItemCusto" placeholder="50.00" class="mt-1 w-full px-2 py-1 border border-gray-300 rounded-md"></div>
-                                        <div class="w-20"><label class="text-xs font-medium">Qtd.</label><input type="number" id="kitItemQtd" value="1" class="mt-1 w-full px-2 py-1 border border-gray-300 rounded-md"></div>
-                                        <button onclick="window.adicionarItemKit()" class="bg-blue-500 text-white rounded-md h-9 w-9 flex-shrink-0 hover:bg-blue-600"><i class="ph-bold ph-plus"></i></button>
+                                    <div class="grid grid-cols-12 gap-2 mt-4 p-2 bg-gray-50 rounded-md items-end">
+                                        <div class="col-span-12 md:col-span-4"><label class="text-xs font-medium">Nome do Item</label><input type="text" id="kitItemNome" placeholder="Ex: Produto A" class="mt-1 w-full px-2 py-1 border border-gray-300 rounded-md"></div>
+                                        <div class="col-span-4 md:col-span-2"><label class="text-xs font-medium">Custo (R$)</label><input type="number" id="kitItemCusto" placeholder="50.00" class="mt-1 w-full px-2 py-1 border border-gray-300 rounded-md"></div>
+                                        <div class="col-span-2 md:col-span-1"><label class="text-xs font-medium">Qtd.</label><input type="number" id="kitItemQtd" value="1" class="mt-1 w-full px-2 py-1 border border-gray-300 rounded-md"></div>
+                                        <div class="col-span-3 md:col-span-2"><label class="text-xs font-medium">IPI (%)</label><input type="number" id="kitItemIPI" placeholder="10" class="mt-1 w-full px-2 py-1 border border-gray-300 rounded-md"></div>
+                                        <div class="col-span-3 md:col-span-2"><label class="text-xs font-medium">ICMS ST (%)</label><input type="number" id="kitItemICMS" placeholder="18" class="mt-1 w-full px-2 py-1 border border-gray-300 rounded-md"></div>
+                                        <button onclick="window.adicionarItemKit()" class="col-span-12 md:col-span-1 bg-blue-500 text-white rounded-md h-9 w-full flex-shrink-0 hover:bg-blue-600 flex items-center justify-center"><i class="ph-bold ph-plus"></i></button>
                                     </div>
                                     <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-right">
-                                        <span class="text-sm font-medium text-gray-600">Custo Total dos Itens:</span>
+                                        <span class="text-sm font-medium text-gray-600">Custo Total Direto da Proposta:</span>
                                         <span id="custoTotalKit" class="text-lg font-bold text-blue-700 ml-2">R$ 0,00</span>
                                     </div>
                                     <div class="mt-4">
                                         <h3 class="font-semibold text-lg border-b pb-2">2. Despesas da Proposta</h3>
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 mt-4">
                                             <div class="space-y-4 md:col-start-2">
-                                                <div><label for="impostosKit" class="block text-sm font-medium text-gray-700">Impostos (%)</label><input type="number" id="impostosKit" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="10"></div>
                                                 <div><label for="taxaPagamentoKit" class="block text-sm font-medium text-gray-700">Taxa Pagamento (à vista) (%)</label><input type="number" id="taxaPagamentoKit" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="4.5"></div>
                                                 <div><label for="comissaoKit" class="block text-sm font-medium text-gray-700">Comissão (%)</label><input type="number" id="comissaoKit" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="5"></div>
                                                 <div><label for="custoFixoKit" class="block text-sm font-medium text-gray-700">Rateio Custo Fixo (%)</label><input type="number" id="custoFixoKit" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="3"></div>
@@ -439,23 +439,6 @@
                     </div>
                 </div>
 
-                <!-- O restante do HTML das outras abas (funil, script, etc.) vai aqui -->
-                <!-- Gerador de Script -->
-                <div id="script" class="tab-content">
-                    <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
-                        <h2 class="text-2xl font-bold mb-1">Gerador de Script de Vendas</h2>
-                        <p class="text-gray-600 mb-6">Preencha os campos para criar um roteiro de abordagem inicial.</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div><label for="scriptNomeCliente" class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente</label><input type="text" id="scriptNomeCliente" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: João Silva"></div>
-                            <div><label for="scriptNomeEmpresa" class="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa do Cliente</label><input type="text" id="scriptNomeEmpresa" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Silva & Filhos Ltda"></div>
-                            <div><label for="scriptProduto" class="block text-sm font-medium text-gray-700 mb-1">Seu Produto/Serviço</label><input type="text" id="scriptProduto" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Software de Gestão"></div>
-                            <div><label for="scriptDor" class="block text-sm font-medium text-gray-700 mb-1">Principal Dor que resolve</label><input type="text" id="scriptDor" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Otimizar o controle de estoque"></div>
-                        </div>
-                        <button onclick="window.gerarScript()" class="mt-6 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition">Gerar Script</button>
-                        <div id="resultadoScript" class="result-box mt-6 hidden whitespace-pre-wrap"></div>
-                    </div>
-                </div>
-                
                 <!-- Funil de Vendas -->
                 <div id="funil" class="tab-content">
                     <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
@@ -550,6 +533,28 @@
                 <!-- Estratégias de Vendas -->
                 <div id="estrategias" class="tab-content">
                     <div class="bg-white p-6 md:p-8 rounded-lg shadow-md space-y-10">
+                        <div class="bg-white p-6 rounded-lg shadow-md border">
+                            <h2 class="text-2xl font-bold mb-1">Gerador de Abordagem Personalizada</h2>
+                            <p class="text-gray-600 mb-6">Preencha os dados para gerar um plano de ação e script de abordagem para o seu cliente.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div><label for="abordagemNomeCliente" class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente</label><input type="text" id="abordagemNomeCliente" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: João Silva"></div>
+                                <div><label for="abordagemNomeEmpresa" class="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa</label><input type="text" id="abordagemNomeEmpresa" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Silva & Filhos Ltda"></div>
+                                <div><label for="abordagemProduto" class="block text-sm font-medium text-gray-700 mb-1">Seu Produto/Serviço</label><input type="text" id="abordagemProduto" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Software de Gestão"></div>
+                                <div><label for="abordagemDor" class="block text-sm font-medium text-gray-700 mb-1">Principal Dor que resolve</label><input type="text" id="abordagemDor" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ex: Otimizar o controle de estoque"></div>
+                                <div class="md:col-span-2">
+                                    <label for="abordagemPerfil" class="block text-sm font-medium text-gray-700 mb-1">Perfil Comportamental do Cliente</label>
+                                    <select id="abordagemPerfil" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                                        <option value="lobo">Lobo (Analítico)</option>
+                                        <option value="gato">Gato (Relacional)</option>
+                                        <option value="tubarao">Tubarão (Executor)</option>
+                                        <option value="aguia">Águia (Visionário)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="window.gerarPlanoAcao()" class="mt-6 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition">Gerar Plano de Ação</button>
+                            <div id="resultadoPlanoAcao" class="result-box mt-6 hidden"></div>
+                        </div>
+
                         <div>
                             <h2 class="text-3xl font-bold mb-2">Decifrando Perfis de Cliente</h2>
                             <p class="text-gray-600 mb-6">Adapte sua abordagem ao estilo de cada cliente para aumentar suas chances de sucesso.</p>
@@ -617,6 +622,33 @@
                                         <p><strong>2. Isole a Objeção:</strong> "Além do preço, existe algum outro fator na proposta deles que te agradou mais que a nossa?"</p>
                                         <p><strong>3. Argumente com Valor (use a TCO!):</strong> "Entendo que o preço inicial deles seja menor. Inclusive, podemos usar nossa calculadora de <strong>Custo Total de Propriedade (TCO)</strong>. A solução deles tem uma vida útil de Y anos e um custo de manutenção anual de R$ Z. A nossa, embora o investimento inicial seja um pouco maior, dura W anos e tem um custo anual de apenas R$ K. No final de 5 anos, a nossa solução representa uma economia de R$ X. O barato pode sair caro."</p>
                                         <p><strong>4. Confirme:</strong> "Pensando no longo prazo e na economia total, qual das duas opções parece ser o melhor investimento para sua empresa?"</p>
+                                    </div>
+                                </details>
+                                <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group border">
+                                    <summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">"Já temos uma solução / Estamos satisfeitos."</summary>
+                                    <div class="mt-3 pt-3 border-t text-gray-700 space-y-2">
+                                        <p><strong>1. Valide e Empatize:</strong> "Fico feliz em saber que já têm uma solução para isso. Mostra que a empresa de vocês se preocupa com a eficiência."</p>
+                                        <p><strong>2. Desafie sutilmente (curiosidade):</strong> "Só por curiosidade, se pudesse melhorar apenas uma coisa na sua solução atual, o que seria? Muitas empresas que usavam a solução Y, assim como vocês, vieram para a nossa por causa do [Mencione um diferencial chave]."</p>
+                                        <p><strong>3. Argumente com Valor (diferencial):</strong> "A nossa abordagem é um pouco diferente. Enquanto a solução Y foca em A, nós focamos em B, o que para clientes como vocês resultou numa economia de Z% em custos operacionais (use dados do **ROI** ou **TCO**)."</p>
+                                        <p><strong>4. Confirme:</strong> "Não gostaria de trocar a sua solução, mas talvez valesse a pena uma conversa de 15 minutos para ver se essa economia também se aplicaria ao seu negócio?"</p>
+                                    </div>
+                                </details>
+                                <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group border">
+                                    <summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">"Não tenho tempo para implementar isso agora."</summary>
+                                    <div class="mt-3 pt-3 border-t text-gray-700 space-y-2">
+                                        <p><strong>1. Valide e Empatize:</strong> "Entendo perfeitamente, o dia a dia é corrido e a última coisa que queremos é um projeto que atrapalhe a operação."</p>
+                                        <p><strong>2. Isole a Objeção:</strong> "Se a questão do tempo de implementação não fosse um problema, você estaria pronto para avançar?"</p>
+                                        <p><strong>3. Argumente com Valor (facilidade):</strong> "Nós projetámos a nossa implementação para ser o mais simples possível. Na verdade, a nossa equipa cuida de 90% do processo, e da sua parte precisaríamos de apenas X horas na primeira semana. Muitos clientes relatam que o tempo que economizam já no primeiro mês (use o **ROI** para calcular isso) compensa largamente este investimento inicial de tempo."</p>
+                                        <p><strong>4. Confirme:</strong> "O que acha de reservarmos uma data na sua agenda para daqui a 3 semanas? Assim não impacta as suas prioridades atuais e já garantimos o início do projeto para começar a gerar essa economia para si."</p>
+                                    </div>
+                                </details>
+                                <details class="bg-gray-50 p-4 rounded-lg cursor-pointer group border">
+                                    <summary class="font-semibold text-lg text-gray-800 group-open:text-blue-700">"Não tenho orçamento para isso este ano."</summary>
+                                    <div class="mt-3 pt-3 border-t text-gray-700 space-y-2">
+                                        <p><strong>1. Valide e Empatize:</strong> "Compreendo, o planeamento orçamental é uma parte crítica da gestão."</p>
+                                        <p><strong>2. Isole a Objeção:</strong> "O orçamento é o único impedimento? Se encontrássemos uma forma de o encaixar, você veria valor na solução?"</p>
+                                        <p><strong>3. Argumente com Valor (Custo de Não Fazer):</strong> "Muitas vezes, o custo de *não* resolver o problema de [Dor do Cliente] acaba por ser maior do que o investimento na solução. Com base no nosso cálculo de **ROI**, a sua empresa está a deixar de economizar/ganhar cerca de R$ Y por mês. Em 3 meses, o custo da ineficiência já seria maior que o investimento inicial."</p>
+                                        <p><strong>4. Confirme (Ofereça alternativas):</strong> "Pensando nisso, talvez possamos explorar um plano de pagamento faseado ou iniciar com um projeto piloto de menor valor para que possa começar a ter o retorno ainda este ano. Faria sentido explorarmos essa possibilidade?"</p>
                                     </div>
                                 </details>
                             </div>
@@ -697,8 +729,40 @@
             document.getElementById('registerError').textContent = '';
         }
 
-        // --- Funções Auxiliares de UI ---
-        const formatCurrency = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        // --- Funções Auxiliares de UI e Utilitários ---
+        const formatCurrency = (value) => !isNaN(parseFloat(value)) ? parseFloat(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00';
+        
+        function parseCurrency(value) {
+            if (typeof value !== 'string') return parseFloat(value) || 0;
+            return parseFloat(value.replace(/[^0-9,-]+/g,"").replace(",", ".")) || 0;
+        }
+
+        function formatInputCurrency(input) {
+            let value = input.value.replace(/\D/g, '');
+            value = (value / 100).toFixed(2) + '';
+            value = value.replace(".", ",");
+            value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+            input.value = "R$ " + value;
+        }
+
+        function timeAgo(dateString, prefix = '') {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            let interval = seconds / 31536000;
+            if (interval > 1) return `${prefix} há ${Math.floor(interval)} anos`;
+            interval = seconds / 2592000;
+            if (interval > 1) return `${prefix} há ${Math.floor(interval)} meses`;
+            interval = seconds / 86400;
+            if (interval > 1) return `${prefix} há ${Math.floor(interval)} dias`;
+            interval = seconds / 3600;
+            if (interval > 1) return `${prefix} há ${Math.floor(interval)} horas`;
+            interval = seconds / 60;
+            if (interval > 1) return `${prefix} há ${Math.floor(interval)} min`;
+            return `${prefix} há poucos seg.`;
+        }
+        
         function updateStatus(text, color = 'text-gray-500', showSpinner = true) {
             const statusEl = document.getElementById('syncStatus');
             if (statusEl) {
@@ -709,6 +773,20 @@
                     </svg>
                     <span class="${color}">${text}</span>`;
             }
+        }
+
+        function resetUIState() {
+            // Limpa o funil
+            document.querySelectorAll('.kanban-cards').forEach(col => col.innerHTML = '');
+            updateIndicators();
+            // Limpa as tarefas
+            document.getElementById('taskListContainer').innerHTML = '';
+             // Limpa as anotações
+            const noteIds = ['concorrente1_nome', 'concorrente1_fortes', 'concorrente1_fracos', 'concorrente2_nome', 'concorrente2_fortes', 'concorrente2_fracos', 'concorrente3_nome', 'concorrente3_fortes', 'concorrente3_fracos', 'anotacoes_cliente'];
+            noteIds.forEach(id => document.getElementById(id).value = '');
+            // Reseta a meta
+            document.getElementById('metaInput').value = '';
+            updateIndicators();
         }
 
         // --- Funções de Lógica do Firebase (Firestore) ---
@@ -747,9 +825,9 @@
         function loadKanbanState(data) {
             const kanbanCardsContainer = document.querySelector('.kanban-cards');
             if (!kanbanCardsContainer) return;
+            document.querySelectorAll('.kanban-cards').forEach(col => col.innerHTML = ''); // Limpa antes de carregar
             if (data && data.board) {
                 const boardState = JSON.parse(data.board);
-                document.querySelectorAll('.kanban-cards').forEach(col => col.innerHTML = '');
                 let maxId = 0;
                 Object.keys(boardState.columns).forEach(columnId => {
                     const columnEl = document.querySelector(`.kanban-column[data-column="${columnId}"] .kanban-cards`);
@@ -819,16 +897,16 @@
 
         function loadNotesState(data) {
              if (data) {
-                document.getElementById('concorrente1_nome').value = data.concorrente1_nome || '';
-                document.getElementById('concorrente1_fortes').value = data.concorrente1_fortes || '';
-                document.getElementById('concorrente1_fracos').value = data.concorrente1_fracos || '';
-                document.getElementById('concorrente2_nome').value = data.concorrente2_nome || '';
-                document.getElementById('concorrente2_fortes').value = data.concorrente2_fortes || '';
-                document.getElementById('concorrente2_fracos').value = data.concorrente2_fracos || '';
-                document.getElementById('concorrente3_nome').value = data.concorrente3_nome || '';
-                document.getElementById('concorrente3_fortes').value = data.concorrente3_fortes || '';
-                document.getElementById('concorrente3_fracos').value = data.concorrente3_fracos || '';
-                document.getElementById('anotacoes_cliente').value = data.anotacoes_cliente || '';
+                 document.getElementById('concorrente1_nome').value = data.concorrente1_nome || '';
+                 document.getElementById('concorrente1_fortes').value = data.concorrente1_fortes || '';
+                 document.getElementById('concorrente1_fracos').value = data.concorrente1_fracos || '';
+                 document.getElementById('concorrente2_nome').value = data.concorrente2_nome || '';
+                 document.getElementById('concorrente2_fortes').value = data.concorrente2_fortes || '';
+                 document.getElementById('concorrente2_fracos').value = data.concorrente2_fracos || '';
+                 document.getElementById('concorrente3_nome').value = data.concorrente3_nome || '';
+                 document.getElementById('concorrente3_fortes').value = data.concorrente3_fortes || '';
+                 document.getElementById('concorrente3_fracos').value = data.concorrente3_fracos || '';
+                 document.getElementById('anotacoes_cliente').value = data.anotacoes_cliente || '';
              }
         }
 
@@ -898,7 +976,7 @@
                 });
             }
         }
-
+        
         // --- Funções da Aplicação ---
         
         function changeTab(event, tabId) {
@@ -951,29 +1029,44 @@
             const nomeInput = document.getElementById('kitItemNome');
             const custoInput = document.getElementById('kitItemCusto');
             const qtdInput = document.getElementById('kitItemQtd');
+            const ipiInput = document.getElementById('kitItemIPI');
+            const icmsInput = document.getElementById('kitItemICMS');
+
             const nome = nomeInput.value.trim();
             const custo = parseFloat(custoInput.value) || 0;
             const qtd = parseInt(qtdInput.value) || 1;
+            const ipi = parseFloat(ipiInput.value) || 0;
+            const icms = parseFloat(icmsInput.value) || 0;
+
             if (!nome || custo <= 0) {
                 alert('Por favor, preencha o nome e um custo válido para o item.');
                 return;
             }
+
             const container = document.getElementById('itensKitContainer');
             const itemDiv = document.createElement('div');
             itemDiv.className = 'kit-item flex items-center gap-2 bg-white p-2 rounded-md border';
             itemDiv.dataset.custo = custo;
             itemDiv.dataset.qtd = qtd;
+            itemDiv.dataset.ipi = ipi;
+            itemDiv.dataset.icms = icms;
+
+            const custoFinalItem = (custo / (1 - icms / 100)) * (1 + ipi / 100);
+
             itemDiv.innerHTML = `
                 <div class="flex-grow">
-                    <p class="font-semibold">${nome}</p>
-                    <p class="text-xs text-gray-500">${qtd} un. x ${formatCurrency(custo)} = ${formatCurrency(custo * qtd)}</p>
+                    <p class="font-semibold">${nome} (x${qtd})</p>
+                    <p class="text-xs text-gray-500">Custo c/ Impostos: ${formatCurrency(custoFinalItem * qtd)}</p>
                 </div>
                 <button onclick="this.parentElement.remove(); window.atualizarCustoTotalKit();" class="text-red-500 hover:text-red-700 p-1"><i class="ph-bold ph-trash"></i></button>
             `;
             container.appendChild(itemDiv);
+
             nomeInput.value = '';
             custoInput.value = '';
             qtdInput.value = '1';
+            ipiInput.value = '';
+            icmsInput.value = '';
             nomeInput.focus();
             atualizarCustoTotalKit();
         }
@@ -983,7 +1076,10 @@
             document.querySelectorAll('.kit-item').forEach(item => {
                 const custo = parseFloat(item.dataset.custo) || 0;
                 const qtd = parseInt(item.dataset.qtd) || 0;
-                custoTotal += custo * qtd;
+                const ipi = parseFloat(item.dataset.ipi) || 0;
+                const icms = parseFloat(item.dataset.icms) || 0;
+                const custoFinalItem = (custo / (1 - icms / 100)) * (1 + ipi / 100);
+                custoTotal += custoFinalItem * qtd;
             });
             document.getElementById('custoTotalKit').textContent = formatCurrency(custoTotal);
         }
@@ -1005,7 +1101,7 @@
         function analiseFinanceira(modo) {
             let custoTotalDireto = 0;
             let custoProduto = 0;
-            let percImpostos, percTaxaPagamento, percComissao, percCustoFixo;
+            let percImpostos = 0, percTaxaPagamento, percComissao, percCustoFixo;
 
             if (currentSubCalcMode === 'unico') {
                 custoProduto = parseFloat(document.getElementById('custoProduto').value) || 0;
@@ -1016,11 +1112,15 @@
                 percComissao = parseFloat(document.getElementById('comissaoUnico').value) || 0;
                 percCustoFixo = parseFloat(document.getElementById('custoFixoUnico').value) || 0;
             } else { 
-                document.querySelectorAll('.kit-item').forEach(item => {
-                    custoProduto += (parseFloat(item.dataset.custo) || 0) * (parseInt(item.dataset.qtd) || 0);
+                 document.querySelectorAll('.kit-item').forEach(item => {
+                    const custo = parseFloat(item.dataset.custo) || 0;
+                    const qtd = parseInt(item.dataset.qtd) || 0;
+                    const ipi = parseFloat(item.dataset.ipi) || 0;
+                    const icms = parseFloat(item.dataset.icms) || 0;
+                    const custoFinalItem = (custo / (1 - icms / 100)) * (1 + ipi / 100);
+                    custoTotalDireto += custoFinalItem * qtd;
+                    custoProduto += custo * qtd;
                 });
-                custoTotalDireto = custoProduto;
-                percImpostos = parseFloat(document.getElementById('impostosKit').value) || 0;
                 percTaxaPagamento = parseFloat(document.getElementById('taxaPagamentoKit').value) || 0;
                 percComissao = parseFloat(document.getElementById('comissaoKit').value) || 0;
                 percCustoFixo = parseFloat(document.getElementById('custoFixoKit').value) || 0;
@@ -1040,7 +1140,7 @@
                  return;
             }
 
-            const totalPercentuaisVariaveis = percImpostos + percTaxaPagamento + percComissao + percCustoFixo;
+            const totalPercentuaisVariaveis = (currentSubCalcMode === 'unico' ? percImpostos : 0) + percTaxaPagamento + percComissao + percCustoFixo;
             let precoVendaFinal = 0;
             let margemLucroFinal = 0;
 
@@ -1067,15 +1167,15 @@
                 margemLucroInput.value = margemLucroFinal.toFixed(2);
             }
 
-            const valorImpostos = precoVendaFinal * (percImpostos / 100);
+            const valorImpostos = (currentSubCalcMode === 'unico') ? precoVendaFinal * (percImpostos / 100) : custoTotalDireto - custoProduto;
             const valorTaxaPagamento = precoVendaFinal * (percTaxaPagamento / 100);
             const valorComissao = precoVendaFinal * (percComissao / 100);
             const valorCustoFixo = precoVendaFinal * (percCustoFixo / 100);
-            const lucroLiquidoFinal = precoVendaFinal - custoTotalDireto - valorImpostos - valorTaxaPagamento - valorComissao - valorCustoFixo;
+            const lucroLiquidoFinal = precoVendaFinal - custoTotalDireto - (valorImpostos + valorTaxaPagamento + valorComissao + valorCustoFixo);
             const totalCustosDespesas = custoTotalDireto + valorImpostos + valorTaxaPagamento + valorComissao + valorCustoFixo;
             const markupMultiplicador = (custoProduto > 0) ? precoVendaFinal / custoProduto : 0;
             const percCustoProduto = (precoVendaFinal > 0) ? (custoTotalDireto / precoVendaFinal) * 100 : 0;
-            const percDespesasTotais = (precoVendaFinal > 0) ? (totalCustosDespesas - custoTotalDireto) / precoVendaFinal * 100 : 0;
+            const percDespesasTotais = (precoVendaFinal > 0) ? ((totalCustosDespesas - custoTotalDireto) / precoVendaFinal) * 100 : 0;
             const percLucro = (precoVendaFinal > 0) ? (lucroLiquidoFinal / precoVendaFinal) * 100 : 0;
 
             res.innerHTML = `
@@ -1097,7 +1197,7 @@
                     <h4 class="font-semibold text-gray-800 mt-4 mb-2">Detalhamento dos Valores:</h4>
                     <ul class="text-sm space-y-2 text-gray-700">
                         <li class="flex justify-between border-b pb-1"><span>(-) Custos Totais:</span> <span class="font-medium">${formatCurrency(custoTotalDireto)}</span></li>
-                        <li class="flex justify-between border-b pb-1"><span>(-) Impostos (${percImpostos.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorImpostos)}</span></li>
+                        <li class="flex justify-between border-b pb-1"><span>(-) Impostos:</span> <span class="font-medium">${formatCurrency(valorImpostos)}</span></li>
                         <li class="flex justify-between border-b pb-1"><span>(-) Taxa de Pagamento (${percTaxaPagamento.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorTaxaPagamento)}</span></li>
                         <li class="flex justify-between border-b pb-1"><span>(-) Comissão (${percComissao.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorComissao)}</span></li>
                         <li class="flex justify-between border-b pb-1"><span>(-) Rateio Custo Fixo (${percCustoFixo.toFixed(2).replace('.',',')}%):</span> <span class="font-medium">${formatCurrency(valorCustoFixo)}</span></li>
@@ -1112,7 +1212,7 @@
                 </div>
             `;
             
-            lastCalcState = { precoVendaFinal, custoTotalDireto, totalPercentuaisVariaveis, lucroLiquidoFinal, valorTaxaPagamento };
+            lastCalcState = { precoVendaFinal, custoTotalDireto, totalPercentuaisVariaveis, lucroLiquidoFinal, valorTaxaPagamento, valorImpostos };
             simulador.classList.remove('hidden');
             document.getElementById('resultadoSimularDesconto').innerHTML = '';
             document.getElementById('simularDescontoInput').value = '';
@@ -1216,9 +1316,9 @@
                         <div class="w-full bg-gray-200 rounded-full h-5"><div class="bg-gray-500 h-5 rounded-full" style="width: ${percB}%"></div></div>
                     </div>
 
-                    <div class="indicator-card text-center !mt-6 ${economiaTotal > 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}">
-                        <p class="text-sm ${economiaTotal > 0 ? 'text-emerald-800' : 'text-rose-800'}">Economia para o cliente em ${periodo} anos</p>
-                        <p class="text-3xl font-bold ${economiaTotal > 0 ? 'text-emerald-600' : 'text-rose-600'}">${formatCurrency(economiaTotal)}</p>
+                    <div class="indicator-card text-center !mt-6 ${economiaTotal >= 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}">
+                        <p class="text-sm ${economiaTotal >= 0 ? 'text-emerald-800' : 'text-rose-800'}">Economia para o cliente em ${periodo} anos</p>
+                        <p class="text-3xl font-bold ${economiaTotal >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${formatCurrency(economiaTotal)}</p>
                     </div>
                 </div>
                  <p class="text-xs text-center text-gray-500 mt-4">"Embora o preço inicial possa ser diferente, ao longo de ${periodo} anos, a nossa solução representa uma economia de ${formatCurrency(economiaTotal)} para a sua empresa."</p>
@@ -1227,7 +1327,7 @@
 
 
         function simularDesconto() {
-            const { precoVendaFinal, custoTotalDireto, totalPercentuaisVariaveis } = lastCalcState;
+            const { precoVendaFinal, custoTotalDireto, totalPercentuaisVariaveis, valorImpostos } = lastCalcState;
             if (!precoVendaFinal) return; 
 
             const resDiv = document.getElementById('resultadoSimularDesconto');
@@ -1246,8 +1346,8 @@
             resDiv.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 text-center">
                     <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Novo Preço</p><p class="font-bold text-indigo-600">${formatCurrency(novoPrecoVenda)}</p></div>
-                    <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Novo Lucro</p><p class="font-bold ${novoLucroLiquido > 0 ? 'text-emerald-600' : 'text-red-600'}">${formatCurrency(novoLucroLiquido)}</p></div>
-                    <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Nova Margem</p><p class="font-bold ${novaMargem > 0 ? 'text-blue-600' : 'text-red-600'}">${novaMargem.toFixed(2).replace('.',',')}%</p></div>
+                    <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Novo Lucro</p><p class="font-bold ${novoLucroLiquido >= 0 ? 'text-emerald-600' : 'text-red-600'}">${formatCurrency(novoLucroLiquido)}</p></div>
+                    <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Nova Margem</p><p class="font-bold ${novaMargem >= 0 ? 'text-blue-600' : 'text-red-600'}">${novaMargem.toFixed(2).replace('.',',')}%</p></div>
                 </div>
             `;
         }
@@ -1310,8 +1410,8 @@
                 resDiv.innerHTML = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-center">
                         <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Valor da Parcela</p><p class="font-bold text-cyan-600">${numParcelas}x de ${formatCurrency(valorParcela)}</p></div>
-                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Lucro Real</p><p class="font-bold ${novoLucro > 0 ? 'text-emerald-600' : 'text-red-600'}">${formatCurrency(novoLucro)}</p></div>
-                        <div class="bg-white p-2 rounded-md md:col-span-2"><p class="text-xs text-gray-500">Margem Real</p><p class="font-bold ${novaMargem > 0 ? 'text-blue-600' : 'text-red-600'}">${novaMargem.toFixed(2).replace('.',',')}%</p></div>
+                        <div class="bg-white p-2 rounded-md"><p class="text-xs text-gray-500">Lucro Real</p><p class="font-bold ${novoLucro >= 0 ? 'text-emerald-600' : 'text-red-600'}">${formatCurrency(novoLucro)}</p></div>
+                        <div class="bg-white p-2 rounded-md md:col-span-2"><p class="text-xs text-gray-500">Margem Real</p><p class="font-bold ${novaMargem >= 0 ? 'text-blue-600' : 'text-red-600'}">${novaMargem.toFixed(2).replace('.',',')}%</p></div>
                     </div>
                     ${mudancaCustoTexto}
                 `;
@@ -1334,75 +1434,73 @@
             }
         }
 
+        // --- Funções do Gerador de Abordagem ---
+        function gerarPlanoAcao() {
+            const nomeCliente = document.getElementById('abordagemNomeCliente').value || "[Nome do Cliente]";
+            const nomeEmpresa = document.getElementById('abordagemNomeEmpresa').value || "[Empresa do Cliente]";
+            const produto = document.getElementById('abordagemProduto').value || "[Seu Produto/Serviço]";
+            const dor = document.getElementById('abordagemDor').value || "[principal dor do cliente]";
+            const perfil = document.getElementById('abordagemPerfil').value;
 
-        function gerarScript() {
-            const nome = document.getElementById('scriptNomeCliente').value || "[Nome do Cliente]";
-            const empresa = document.getElementById('scriptNomeEmpresa').value || "[Empresa do Cliente]";
-            const produto = document.getElementById('scriptProduto').value || "[Seu Produto/Serviço]";
-            const dor = document.getElementById('scriptDor').value || "[Principal Dor/Problema]";
-            const res = document.getElementById('resultadoScript');
-            const script = `Olá ${nome}, tudo bem?\nMeu nome é [Seu Nome] e falo em nome da [Sua Empresa].\n\nVi que você atua na ${empresa} e percebi que empresas do seu segmento muitas vezes enfrentam desafios para ${dor}.\n\nNós ajudamos exatamente nisso com o nosso ${produto}. Temos um caso de sucesso que, após a implementação, conseguiu [Mencionar um benefício chave, ex: reduzir custos em 20%].\n\nVocê teria 10 minutos na próxima semana para uma breve conversa sobre como podemos ajudar a ${empresa} também?`;
-            res.textContent = script;
-            res.classList.remove('hidden');
+            let plano, script;
+
+            switch (perfil) {
+                case 'lobo':
+                    plano = `<li><strong>Preparação:</strong> Tenha todos os dados, estudos de caso e a calculadora de ROI/TCO à mão.</li>
+                             <li><strong>Abordagem:</strong> Seja direto, objetivo e foque nos números. Evite conversas pessoais longas.</li>
+                             <li><strong>Apresentação:</strong> Mostre a lógica por trás da sua solução. Use gráficos e dados concretos.</li>
+                             <li><strong>Fechamento:</strong> Apresente a proposta e dê-lhe tempo para analisar. Não pressione. Marque um follow-up com data e hora definidas.</li>`;
+                    script = `Olá, ${nomeCliente}. Vi que a ${nomeEmpresa} busca por ${dor}. O nosso ${produto} resolve isso através de [Mecanismo Lógico]. Dados de clientes similares mostram um aumento de X% na eficiência. Gostaria de lhe apresentar os números numa breve chamada de 15 minutos.`;
+                    break;
+                case 'gato':
+                    plano = `<li><strong>Preparação:</strong> Pesquise sobre o cliente (LinkedIn) para encontrar pontos em comum. Tenha depoimentos de clientes satisfeitos prontos.</li>
+                             <li><strong>Abordagem:</strong> Comece com uma conversa leve, crie rapport. Mostre interesse genuíno nele.</li>
+                             <li><strong>Apresentação:</strong> Conte histórias de sucesso de outros clientes. Foque na segurança, na parceria e no suporte que você oferece.</li>
+                             <li><strong>Fechamento:</strong> Ofereça garantias e reforce que você estará ao lado dele durante todo o processo. A decisão é baseada na confiança.</li>`;
+                    script = `Olá, ${nomeCliente}! Vi que você também se interessa por [Ponto em Comum]. Muitos dos meus clientes na ${nomeEmpresa} tinham um desafio com ${dor}. Ajudámo-los com o nosso ${produto} e o resultado foi fantástico. Acredito que podemos fazer o mesmo por si. Que tal conversarmos um pouco?`;
+                    break;
+                case 'tubarao':
+                    plano = `<li><strong>Preparação:</strong> Seja rápido. Tenha sua melhor oferta e os resultados chave na ponta da língua.</li>
+                             <li><strong>Abordagem:</strong> Vá direto ao ponto. Mostre o que você tem e o que isso fará por ele.</li>
+                             <li><strong>Apresentação:</strong> Foque nos resultados, no ROI, na economia. Use a calculadora para mostrar o ganho financeiro.</li>
+                             <li><strong>Fechamento:</strong> Apresente duas ou três opções para que ele sinta que está no controlo da decisão. Use frases de ação.</li>`;
+                    script = `Olá, ${nomeCliente}. Sei que seu tempo é valioso. O ponto é: você quer resolver ${dor}. O meu ${produto} entrega [Resultado Chave] em X dias. Tenho duas opções para começarmos. Qual prefere?`;
+                    break;
+                case 'aguia':
+                    plano = `<li><strong>Preparação:</strong> Pense fora da caixa. Prepare uma visão de futuro, mostrando como sua solução é inovadora.</li>
+                             <li><strong>Abordagem:</strong> Elogie a visão e as ideias do cliente. Pergunte sobre os seus planos para o futuro da empresa.</li>
+                             <li><strong>Apresentação:</strong> Use recursos visuais, mostre o "quadro geral". Fale sobre tendências e como sua solução posiciona a empresa dele à frente da concorrência.</li>
+                             <li><strong>Fechamento:</strong> Venda o conceito, a visão de futuro. Os detalhes técnicos são secundários. Inspire-o a dar o próximo passo rumo à inovação.</li>`;
+                    script = `Olá, ${nomeCliente}. Tenho acompanhado a ${nomeEmpresa} e admiro a vossa visão inovadora. Imagine se vocês pudessem não apenas resolver ${dor}, mas também se tornarem uma referência em [Área de Inovação]. O nosso ${produto} é o primeiro passo para essa visão. Gostaria de partilhar algumas ideias consigo.`;
+                    break;
+            }
+
+            const resultadoDiv = document.getElementById('resultadoPlanoAcao');
+            resultadoDiv.innerHTML = `
+                <h3 class="font-bold text-lg mb-2 text-blue-800">Plano de Ação para o Perfil ${perfil.charAt(0).toUpperCase() + perfil.slice(1)}</h3>
+                <ul class="list-disc list-inside space-y-1 text-gray-700">${plano}</ul>
+                <h3 class="font-bold text-lg mt-4 mb-2 text-blue-800">Sugestão de Script de Abordagem</h3>
+                <p class="bg-gray-100 p-3 rounded-md border text-gray-800 italic">"${script}"</p>`;
+            resultadoDiv.classList.remove('hidden');
         }
 
-        // --- LÓGICA DO FUNIL KANBAN MODERNO ---
-        function updateIndicators() {
-            let activeValue = 0, wonValue = 0, lostValue = 0, weightedValue = 0;
-            let activeCardsCount = 0, wonCardsCount = 0, lostCardsCount = 0;
-            const activeColumns = ['prospect', 'qualify', 'proposal', 'negotiate'];
-            const probabilities = { prospect: 0.10, qualify: 0.30, proposal: 0.60, negotiate: 0.80 };
-
-            document.querySelectorAll('.kanban-column').forEach(column => {
-                const columnId = column.dataset.column;
-                const cards = column.querySelectorAll('.kanban-card');
-                let columnTotalValue = 0;
-                cards.forEach(card => { 
-                    columnTotalValue += parseCurrency(card.querySelector('.card-value-input').value); 
-                });
-
-                document.getElementById(`indicators-${columnId}`).innerHTML = `<span>${formatCurrency(columnTotalValue)}</span> • <span>${cards.length} negócio(s)</span>`;
-                
-                if (activeColumns.includes(columnId)) { 
-                    activeValue += columnTotalValue; 
-                    activeCardsCount += cards.length;
-                    weightedValue += columnTotalValue * (probabilities[columnId] || 0);
-                }
-                else if (columnId === 'won') { 
-                    wonValue += columnTotalValue; 
-                    wonCardsCount += cards.length; 
-                }
-                else if (columnId === 'lost') { 
-                    lostValue += columnTotalValue;
-                    lostCardsCount += cards.length; 
-                }
-            });
-
-            document.getElementById('active-value').textContent = formatCurrency(activeValue);
-            document.getElementById('weighted-value').textContent = formatCurrency(weightedValue);
-            document.getElementById('won-value').textContent = formatCurrency(wonValue);
-            document.getElementById('lost-value').textContent = formatCurrency(lostValue);
-            const averageTicket = wonCardsCount > 0 ? wonValue / wonCardsCount : 0;
-            document.getElementById('average-ticket').textContent = formatCurrency(averageTicket);
-            const totalClosed = wonCardsCount + lostCardsCount;
-            const conversionRate = totalClosed > 0 ? (wonCardsCount / totalClosed) * 100 : 0;
-            document.getElementById('conversion-rate').textContent = `${conversionRate.toFixed(1).replace('.',',')}%`;
-            updateGoalProgress(wonValue);
-        }
-        
+        // --- Funções do Funil Kanban ---
         function addCard() {
             const input = document.getElementById('newCardInput');
-            const text = input.value.trim();
-            if (text === '') return;
-            const card = document.createElement('div');
-            window.cardIdCounter++;
-            card.className = 'kanban-card'; card.draggable = true; card.id = 'card-' + window.cardIdCounter;
-            const now = new Date().toISOString();
-            card.dataset.createdAt = now;
-            card.dataset.stageHistory = JSON.stringify([{ stage: 'prospect', movedAt: now }]);
+            const title = input.value.trim();
+            if (!title) return;
 
-            card.innerHTML = `
-                <input type="text" class="card-title-input font-semibold w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-1 -mx-1" value="${text}" onblur="window.saveKanbanState()">
+            window.cardIdCounter++;
+            const newCard = document.createElement('div');
+            newCard.id = `card-${window.cardIdCounter}`;
+            newCard.className = 'kanban-card';
+            newCard.draggable = true;
+            const now = new Date().toISOString();
+            newCard.dataset.createdAt = now;
+            newCard.dataset.stageHistory = JSON.stringify([{ stage: 'prospect', movedAt: now }]);
+
+            newCard.innerHTML = `
+                <input type="text" class="card-title-input font-semibold w-full bg-transparent" value="${title}" onblur="window.saveKanbanState()">
                 <div class="mt-2 space-y-2 text-sm">
                     <div class="flex items-center gap-2"><i class="ph ph-buildings text-gray-500"></i><input type="text" class="card-company-input card-details-input" placeholder="Empresa" onblur="window.saveKanbanState()"></div>
                     <div class="flex items-center gap-2"><i class="ph ph-user text-gray-500"></i><input type="text" class="card-contact-input card-details-input" placeholder="Contato" onblur="window.saveKanbanState()"></div>
@@ -1411,102 +1509,99 @@
                 </div>
                 <div class="mt-3 pt-3 border-t">
                     <label class="text-xs font-medium text-gray-500">Valor do Negócio</label>
-                    <input type="text" class="card-value-input" placeholder="R$ 0,00" oninput="window.formatInputCurrency(this); window.updateIndicators();" onblur="window.saveKanbanState()">
+                    <input type="text" class="card-value-input" value="R$ 0,00" oninput="window.formatInputCurrency(this); window.updateIndicators();" onblur="window.saveKanbanState()">
                 </div>
                 <div class="mt-2 text-xs text-gray-400 flex justify-between">
-                    <span class="card-created-date">${timeAgo(now, 'Criado')}</span>
-                    <span class="card-stage-time">${timeAgo(now, 'Nesta fase')}</span>
-                </div>`;
-            addCardEventListeners(card);
-            document.querySelector('[data-column="prospect"] .kanban-cards').appendChild(card);
-            input.value = ''; 
+                     <span class="card-created-date">Criado agora</span>
+                     <span class="card-stage-time">Nesta fase agora</span>
+                </div>
+            `;
+            addCardEventListeners(newCard);
+            document.querySelector('.kanban-column[data-column="prospect"] .kanban-cards').appendChild(newCard);
+            input.value = '';
             updateIndicators();
             saveKanbanState();
         }
-        
-        function addCardEventListeners(card){
-            card.addEventListener('dragstart', (e) => { 
-                draggedCard = e.target;
-                setTimeout(() => e.target.classList.add('dragging'), 0);
-             });
-            card.addEventListener('dragend', () => { 
-                if(draggedCard) {
-                    draggedCard.classList.remove('dragging'); 
-                }
+
+        function addCardEventListeners(card) {
+            card.addEventListener('dragstart', () => {
+                draggedCard = card;
+                setTimeout(() => card.classList.add('dragging'), 0);
+            });
+            card.addEventListener('dragend', () => {
+                card.classList.remove('dragging');
                 draggedCard = null;
             });
         }
 
-        function formatInputCurrency(input) {
-            let value = input.value.replace(/\D/g, '');
-            if (value === "") {
-                input.value = "";
-                return;
-            }
-            value = (parseInt(value, 10) / 100);
-            
-            input.value = new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(value);
-        }
+        function updateIndicators() {
+            const stageProbabilities = {
+                prospect: 0.1, qualify: 0.25, proposal: 0.5, negotiate: 0.75, won: 1, lost: 0
+            };
+            let totalWon = 0, totalLost = 0, activeValue = 0, weightedValue = 0;
+            let wonCount = 0, lostCount = 0, activeCount = 0;
+            const columns = document.querySelectorAll('.kanban-column');
 
-        function parseCurrency(value) {
-            if (typeof value === 'number') return value;
-            return Number(String(value).replace(/[^0-9,-]+/g,"").replace(",", ".")) || 0;
-        }
-
-        function updateGoalProgress(wonValue) {
-            const metaInput = document.getElementById('metaInput');
-            const progressBar = document.getElementById('goalProgressBar');
-            const percentageText = document.getElementById('goalPercentage');
-            const remainingText = document.getElementById('goalRemaining');
-            const meta = parseCurrency(metaInput.value);
-
-            if (meta > 0) {
-                const percentage = Math.min((wonValue / meta) * 100, 100);
-                progressBar.style.width = `${percentage}%`;
-                percentageText.textContent = `${percentage.toFixed(0)}%`;
+            columns.forEach(column => {
+                const columnId = column.dataset.column;
+                const cards = column.querySelectorAll('.kanban-card');
+                let columnValue = 0;
+                cards.forEach(card => {
+                    const value = parseCurrency(card.querySelector('.card-value-input').value);
+                    columnValue += value;
+                });
                 
-                const remaining = meta - wonValue;
-                if (remaining > 0) {
-                    remainingText.textContent = `Falta atingir: ${formatCurrency(remaining)}`;
-                } else {
-                    remainingText.textContent = "Meta atingida! Parabéns!";
+                const indicatorEl = document.getElementById(`indicators-${columnId}`);
+                if (indicatorEl) {
+                    indicatorEl.innerHTML = `<span class="font-bold">${formatCurrency(columnValue)}</span> | <span class="text-gray-500">${cards.length} neg.</span>`;
                 }
+
+                if (columnId === 'won') {
+                    totalWon = columnValue;
+                    wonCount = cards.length;
+                } else if (columnId === 'lost') {
+                    totalLost = columnValue;
+                    lostCount = cards.length;
+                } else {
+                    activeValue += columnValue;
+                    activeCount += cards.length;
+                    weightedValue += columnValue * (stageProbabilities[columnId] || 0);
+                }
+            });
+
+            const totalDeals = wonCount + lostCount + activeCount;
+            const conversionRate = totalDeals > 0 ? (wonCount / (totalDeals - lostCount)) * 100 : 0;
+            const averageTicket = wonCount > 0 ? totalWon / wonCount : 0;
+
+            document.getElementById('active-value').textContent = formatCurrency(activeValue);
+            document.getElementById('weighted-value').textContent = formatCurrency(weightedValue);
+            document.getElementById('won-value').textContent = formatCurrency(totalWon);
+            document.getElementById('lost-value').textContent = formatCurrency(totalLost);
+            document.getElementById('average-ticket').textContent = formatCurrency(averageTicket);
+            document.getElementById('conversion-rate').textContent = `${conversionRate.toFixed(1)}%`;
+
+            const metaValue = parseCurrency(document.getElementById('metaInput').value);
+            if (metaValue > 0) {
+                const percentage = Math.min((totalWon / metaValue) * 100, 100);
+                document.getElementById('goalProgressBar').style.width = `${percentage}%`;
+                document.getElementById('goalPercentage').textContent = `${percentage.toFixed(0)}%`;
+                const remaining = metaValue - totalWon;
+                document.getElementById('goalRemaining').textContent = remaining > 0 ? `Faltam ${formatCurrency(remaining)}` : 'Meta atingida!';
             } else {
-                progressBar.style.width = '0%';
-                percentageText.textContent = '0%';
-                remainingText.textContent = 'Defina uma meta para acompanhar.';
+                document.getElementById('goalProgressBar').style.width = `0%`;
+                document.getElementById('goalPercentage').textContent = `0%`;
+                document.getElementById('goalRemaining').textContent = 'Defina uma meta para acompanhar.';
             }
         }
 
-        function timeAgo(dateString, prefix = '') {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            const now = new Date();
-            const seconds = Math.round((now - date) / 1000);
-            const minutes = Math.round(seconds / 60);
-            const hours = Math.round(minutes / 60);
-            const days = Math.round(hours / 24);
-            
-            let text;
-            if (seconds < 60) text = `há ${seconds} seg`;
-            else if (minutes < 60) text = `há ${minutes} min`;
-            else if (hours < 24) text = `há ${hours}h`;
-            else text = `há ${days}d`;
-
-            return `${prefix} ${text}`;
-        }
-
+        // --- Funções do Plano de Ação (Tarefas) ---
         function addTask() {
             const input = document.getElementById('newTaskInput');
             const text = input.value.trim();
-            if (text === '') return;
+            if (!text) return;
 
-            const taskListContainer = document.getElementById('taskListContainer');
+            const taskId = `task-${Date.now()}`;
             const taskEl = document.createElement('div');
-            const taskId = 'task-' + Date.now();
             taskEl.id = taskId;
             taskEl.className = 'task-item flex items-center justify-between p-3 bg-gray-50 rounded-lg border';
             taskEl.innerHTML = `
@@ -1516,7 +1611,8 @@
                 </div>
                 <button onclick="window.deleteTask('${taskId}')" class="text-gray-400 hover:text-red-600"><i class="ph-bold ph-trash"></i></button>
             `;
-            taskListContainer.appendChild(taskEl);
+
+            document.getElementById('taskListContainer').appendChild(taskEl);
             input.value = '';
             saveTasksState();
         }
@@ -1530,8 +1626,9 @@
             document.getElementById(taskId)?.classList.toggle('completed');
             saveTasksState();
         }
+
+        // --- Event Listeners Globais e Inicialização ---
         
-        // --- Expor funções para o escopo global ---
         window.changeTab = changeTab;
         window.changeCalcMode = changeCalcMode;
         window.changeSubCalcMode = changeSubCalcMode;
@@ -1545,7 +1642,7 @@
         window.simularDesconto = simularDesconto;
         window.calcularDescontoMaximo = calcularDescontoMaximo;
         window.calcularParcelamento = calcularParcelamento;
-        window.gerarScript = gerarScript;
+        window.gerarPlanoAcao = gerarPlanoAcao;
         window.addCard = addCard;
         window.updateIndicators = updateIndicators;
         window.saveKanbanState = saveKanbanState;
@@ -1556,24 +1653,7 @@
         window.addTask = addTask;
         window.deleteTask = deleteTask;
         window.toggleTaskCompletion = toggleTaskCompletion;
-
-        function resetUIState() {
-            document.querySelectorAll('.kanban-cards').forEach(col => col.innerHTML = '');
-            updateIndicators();
-            document.getElementById('taskListContainer').innerHTML = '';
-            const noteIds = ['concorrente1_nome', 'concorrente1_fortes', 'concorrente1_fracos', 'concorrente2_nome', 'concorrente2_fortes', 'concorrente2_fracos', 'concorrente3_nome', 'concorrente3_fortes', 'concorrente3_fracos', 'anotacoes_cliente'];
-            noteIds.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.value = '';
-            });
-            document.getElementById('resultadoAnalise').innerHTML = '<p class="text-gray-500 text-center py-10">Preencha os campos e calcule para ver os resultados.</p>';
-            document.getElementById('simuladorNegociacao').classList.add('hidden');
-            document.getElementById('metaInput').value = '';
-            updateGoalProgress(0);
-            lastCalcState = {};
-        }
         
-        // --- Inicialização ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 resetUIState();
@@ -1667,4 +1747,3 @@
     </script>
 </body>
 </html>
-
