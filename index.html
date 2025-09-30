@@ -75,7 +75,7 @@
             transition: background-color 0.2s;
         }
         .kanban-card {
-            position: relative; /* Adicionado para o botão de apagar */
+            position: relative;
             background-color: white;
             padding: 1rem;
             border-radius: 0.5rem;
@@ -83,6 +83,8 @@
             margin-bottom: 1rem;
             cursor: grab;
             border: 1px solid #e2e8f0;
+            border-left-width: 4px; /* Aumenta a borda para a temperatura */
+            transition: border-color 0.3s ease-in-out;
         }
         .kanban-card:active { cursor: grabbing; }
         .kanban-card.dragging { opacity: 0.5; transform: rotate(2deg); }
@@ -148,6 +150,14 @@
         details > summary::after { content: '+'; float: right; font-size: 1.5rem; font-weight: bold; }
         details[open] > summary::after { content: '−'; }
         
+        /* Novos Estilos Plano de Ação */
+        .task-item {
+            transition: all 0.2s ease-in-out;
+        }
+        .task-item.completed {
+            background-color: #f1f5f9;
+            opacity: 0.7;
+        }
         .task-item.completed span {
             text-decoration: line-through;
             color: #9ca3af;
@@ -170,6 +180,30 @@
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             border: 1px solid #e2e8f0;
         }
+        
+        /* Novos Estilos Lead Temperature */
+        .temp-selector { display: flex; gap: 0.5rem; }
+        .temp-btn {
+            background-color: #e2e8f0;
+            color: #64748b;
+            border: 2px solid transparent;
+            border-radius: 9999px;
+            width: 2rem; height: 2rem;
+            display: inline-flex; justify-content: center; align-items: center;
+            font-size: 0.8rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .temp-btn:hover { background-color: #cbd5e1; }
+        .temp-btn.active { transform: scale(1.1); box-shadow: 0 0 0 2px white, 0 0 0 4px currentColor; }
+        
+        .temp-hot.active { background-color: #ef4444; color: #ef4444; }
+        .temp-warm.active { background-color: #f97316; color: #f97316; }
+        .temp-cold.active { background-color: #3b82f6; color: #3b82f6; }
+        
+        .kanban-card.temp-hot { border-left-color: #ef4444; }
+        .kanban-card.temp-warm { border-left-color: #f97316; }
+        .kanban-card.temp-cold { border-left-color: #3b82f6; }
+
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -720,7 +754,7 @@
 
                  <!-- Plano de Ação -->
                 <div id="plano-acao" class="tab-content">
-                     <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+                     <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
                          <h2 class="text-3xl font-bold mb-2">Plano de Ação e Tarefas</h2>
                          <p class="text-gray-600 mb-6">Organize suas atividades e próximos passos. Suas tarefas são salvas automaticamente.</p>
                          <div class="flex flex-col md:flex-row gap-4 mb-6 border-b pb-6">
@@ -735,13 +769,52 @@
 
                 <!-- Análise de Concorrência -->
                 <div id="concorrencia" class="tab-content">
-                    <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
-                        <h2 class="text-2xl font-bold mb-1">Análise de Concorrência</h2>
+                    <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                        <h2 class="text-3xl font-bold mb-2">Análise de Concorrência</h2>
                         <p class="text-gray-600 mb-6">Anote os pontos fortes e fracos dos seus principais concorrentes. Suas notas são salvas automaticamente.</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div class="bg-gray-50 p-4 rounded-lg"><input type="text" id="concorrente1_nome" placeholder="Nome do Concorrente 1" class="w-full font-bold text-lg mb-2 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500" oninput="window.debounceSaveNotes()"><label class="font-semibold mt-4 block">Pontos Fortes:</label><textarea id="concorrente1_fortes" class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" placeholder="Ex: Preço agressivo..." oninput="window.debounceSaveNotes()"></textarea><label class="font-semibold mt-4 block">Pontos Fracos:</label><textarea id="concorrente1_fracos" class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" placeholder="Ex: Suporte ao cliente..." oninput="window.debounceSaveNotes()"></textarea></div>
-                            <div class="bg-gray-50 p-4 rounded-lg"><input type="text" id="concorrente2_nome" placeholder="Nome do Concorrente 2" class="w-full font-bold text-lg mb-2 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500" oninput="window.debounceSaveNotes()"><label class="font-semibold mt-4 block">Pontos Fortes:</label><textarea id="concorrente2_fortes" class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" oninput="window.debounceSaveNotes()"></textarea><label class="font-semibold mt-4 block">Pontos Fracos:</label><textarea id="concorrente2_fracos" class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" oninput="window.debounceSaveNotes()"></textarea></div>
-                            <div class="bg-gray-50 p-4 rounded-lg"><input type="text" id="concorrente3_nome" placeholder="Nome do Concorrente 3" class="w-full font-bold text-lg mb-2 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500" oninput="window.debounceSaveNotes()"><label class="font-semibold mt-4 block">Pontos Fortes:</label><textarea id="concorrente3_fortes" class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" oninput="window.debounceSaveNotes()"></textarea><label class="font-semibold mt-4 block">Pontos Fracos:</label><textarea id="concorrente3_fracos" class="w-full mt-1 p-2 border border-gray-200 rounded-md h-32" oninput="window.debounceSaveNotes()"></textarea></div>
+                        <div class="space-y-8">
+                            <!-- Concorrente 1 -->
+                            <div class="bg-white p-6 rounded-lg shadow-md border">
+                                <input type="text" id="concorrente1_nome" placeholder="Nome do Concorrente 1" class="w-full font-bold text-xl mb-4 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500" oninput="window.debounceSaveNotes()">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                                    <div>
+                                        <label class="font-semibold text-gray-700 flex items-center gap-2"><i class="ph-bold ph-thumbs-up text-emerald-500"></i>Pontos Fortes:</label>
+                                        <textarea id="concorrente1_fortes" class="w-full mt-2 p-2 border border-gray-300 rounded-md h-32" placeholder="Ex: Preço agressivo..." oninput="window.debounceSaveNotes()"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="font-semibold text-gray-700 flex items-center gap-2"><i class="ph-bold ph-thumbs-down text-rose-500"></i>Pontos Fracos:</label>
+                                        <textarea id="concorrente1_fracos" class="w-full mt-2 p-2 border border-gray-300 rounded-md h-32" placeholder="Ex: Suporte ao cliente..." oninput="window.debounceSaveNotes()"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                             <!-- Concorrente 2 -->
+                            <div class="bg-white p-6 rounded-lg shadow-md border">
+                                <input type="text" id="concorrente2_nome" placeholder="Nome do Concorrente 2" class="w-full font-bold text-xl mb-4 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500" oninput="window.debounceSaveNotes()">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                                    <div>
+                                        <label class="font-semibold text-gray-700 flex items-center gap-2"><i class="ph-bold ph-thumbs-up text-emerald-500"></i>Pontos Fortes:</label>
+                                        <textarea id="concorrente2_fortes" class="w-full mt-2 p-2 border border-gray-300 rounded-md h-32" oninput="window.debounceSaveNotes()"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="font-semibold text-gray-700 flex items-center gap-2"><i class="ph-bold ph-thumbs-down text-rose-500"></i>Pontos Fracos:</label>
+                                        <textarea id="concorrente2_fracos" class="w-full mt-2 p-2 border border-gray-300 rounded-md h-32" oninput="window.debounceSaveNotes()"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                             <!-- Concorrente 3 -->
+                            <div class="bg-white p-6 rounded-lg shadow-md border">
+                                <input type="text" id="concorrente3_nome" placeholder="Nome do Concorrente 3" class="w-full font-bold text-xl mb-4 bg-transparent border-b-2 border-gray-200 focus:outline-none focus:border-blue-500" oninput="window.debounceSaveNotes()">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                                    <div>
+                                        <label class="font-semibold text-gray-700 flex items-center gap-2"><i class="ph-bold ph-thumbs-up text-emerald-500"></i>Pontos Fortes:</label>
+                                        <textarea id="concorrente3_fortes" class="w-full mt-2 p-2 border border-gray-300 rounded-md h-32" oninput="window.debounceSaveNotes()"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="font-semibold text-gray-700 flex items-center gap-2"><i class="ph-bold ph-thumbs-down text-rose-500"></i>Pontos Fracos:</label>
+                                        <textarea id="concorrente3_fracos" class="w-full mt-2 p-2 border border-gray-300 rounded-md h-32" oninput="window.debounceSaveNotes()"></textarea>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1046,7 +1119,8 @@
                         notes: card.querySelector('.card-notes-input').value,
                         value: parseCurrency(card.querySelector('.card-value-input').value),
                         createdAt: card.dataset.createdAt,
-                        stageHistory: JSON.parse(card.dataset.stageHistory)
+                        stageHistory: JSON.parse(card.dataset.stageHistory),
+                        temperature: card.dataset.temperature || null, // Salva a temperatura
                     });
                 });
                 boardState.columns[columnId] = cards;
@@ -1072,28 +1146,7 @@
                     const columnEl = document.querySelector(`.kanban-column[data-column="${columnId}"] .kanban-cards`);
                     if (columnEl) {
                         boardState.columns[columnId].forEach(cardData => {
-                            const card = document.createElement('div');
-                            card.className = 'kanban-card'; card.draggable = true; card.id = cardData.id;
-                            card.dataset.createdAt = cardData.createdAt;
-                            card.dataset.stageHistory = JSON.stringify(cardData.stageHistory);
-                             card.innerHTML = `
-                                <button onclick="window.deleteCard('${cardData.id}')" class="absolute top-2 right-2 text-gray-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-red-50 z-10"><i class="ph ph-trash"></i></button>
-                                <input type="text" class="card-title-input font-semibold w-full bg-transparent focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-1 -mx-1" value="${cardData.title || ''}" onblur="window.saveKanbanState()">
-                                <div class="mt-2 space-y-2 text-sm">
-                                    <div class="flex items-center gap-2"><i class="ph ph-buildings text-gray-500"></i><input type="text" class="card-company-input card-details-input" placeholder="Empresa" value="${cardData.company || ''}" onblur="window.saveKanbanState()"></div>
-                                    <div class="flex items-center gap-2"><i class="ph ph-user text-gray-500"></i><input type="text" class="card-contact-input card-details-input" placeholder="Contato" value="${cardData.contact || ''}" onblur="window.saveKanbanState()"></div>
-                                    <div class="flex items-center gap-2"><i class="ph ph-calendar text-gray-500"></i><input type="text" class="card-date-input card-details-input" placeholder="Data (dd/mm/aa)" value="${cardData.date || ''}" onblur="window.saveKanbanState()"></div>
-                                    <div class="flex items-start gap-2"><i class="ph ph-note-pencil text-gray-500 mt-1"></i><textarea class="card-notes-input card-details-input h-16" placeholder="Anotações..." onblur="window.saveKanbanState()">${cardData.notes || ''}</textarea></div>
-                                </div>
-                                <div class="mt-3 pt-3 border-t">
-                                    <label class="text-xs font-medium text-gray-500">Valor do Negócio</label>
-                                    <input type="text" class="card-value-input" value="${formatCurrency(cardData.value || 0)}" placeholder="R$ 0,00" oninput="window.formatInputCurrency(this); window.updateIndicators();" onblur="window.saveKanbanState()">
-                                </div>
-                                <div class="mt-2 text-xs text-gray-400 flex justify-between">
-                                    <span class="card-created-date">${timeAgo(cardData.createdAt, 'Criado')}</span>
-                                    <span class="card-stage-time">${timeAgo(cardData.stageHistory[cardData.stageHistory.length - 1].movedAt, 'Nesta fase')}</span>
-                                </div>`;
-                            addCardEventListeners(card);
+                            const card = createCardElement(cardData);
                             columnEl.appendChild(card);
                             const currentId = parseInt(cardData.id.split('-')[1]);
                             if (currentId > maxId) maxId = currentId;
@@ -1201,11 +1254,11 @@
         function loadTasksState(data) {
             const taskListContainer = document.getElementById('taskListContainer');
             taskListContainer.innerHTML = '';
-            if (data && data.tasks) {
+            if (data && data.tasks && data.tasks.length > 0) {
                 data.tasks.forEach(taskData => {
                     const taskEl = document.createElement('div');
                     taskEl.id = taskData.id;
-                    taskEl.className = `task-item flex items-center justify-between p-3 bg-gray-50 rounded-lg border ${taskData.completed ? 'completed' : ''}`;
+                    taskEl.className = `task-item flex items-center justify-between p-3 bg-white rounded-lg border shadow-sm ${taskData.completed ? 'completed' : ''}`;
                     taskEl.innerHTML = `
                         <div class="flex items-center gap-3">
                             <input type="checkbox" ${taskData.completed ? 'checked' : ''} class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" onclick="window.toggleTaskCompletion('${taskData.id}')">
@@ -1215,6 +1268,13 @@
                     `;
                     taskListContainer.appendChild(taskEl);
                 });
+            } else {
+                 taskListContainer.innerHTML = `
+                    <div class="text-center py-10">
+                        <i class="ph-bold ph-check-circle text-5xl text-emerald-400 mx-auto"></i>
+                        <h3 class="mt-2 text-xl font-semibold text-gray-800">Tudo em dia!</h3>
+                        <p class="mt-1 text-gray-500">Nenhuma tarefa pendente. Adicione uma nova tarefa acima.</p>
+                    </div>`;
             }
             updateSummaryView();
         }
@@ -1781,41 +1841,97 @@
         }
 
         // --- Funções do Funil Kanban ---
+        function createCardElement(cardData) {
+            const card = document.createElement('div');
+            card.className = 'kanban-card';
+            card.draggable = true;
+            card.id = cardData.id;
+            card.dataset.createdAt = cardData.createdAt;
+            card.dataset.stageHistory = JSON.stringify(cardData.stageHistory || []);
+            card.dataset.temperature = cardData.temperature || ''; // Set temperature data attribute
+
+            // Apply temperature class
+            if (cardData.temperature) {
+                card.classList.add(`temp-${cardData.temperature}`);
+            }
+            
+            card.innerHTML = `
+                <button onclick="window.deleteCard('${cardData.id}')" class="absolute top-2 right-2 text-gray-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-red-50 z-10"><i class="ph ph-trash"></i></button>
+                <input type="text" class="card-title-input font-semibold w-full bg-transparent" value="${cardData.title || ''}" onblur="window.saveKanbanState()">
+                <div class="mt-2 space-y-2 text-sm">
+                    <div class="flex items-center gap-2"><i class="ph ph-buildings text-gray-500"></i><input type="text" class="card-company-input card-details-input" placeholder="Empresa" value="${cardData.company || ''}" onblur="window.saveKanbanState()"></div>
+                    <div class="flex items-center gap-2"><i class="ph ph-user text-gray-500"></i><input type="text" class="card-contact-input card-details-input" placeholder="Contato" value="${cardData.contact || ''}" onblur="window.saveKanbanState()"></div>
+                    <div class="flex items-center gap-2"><i class="ph ph-calendar text-gray-500"></i><input type="text" class="card-date-input card-details-input" placeholder="Data (dd/mm/aa)" value="${cardData.date || ''}" onblur="window.saveKanbanState()"></div>
+                    <div class="flex items-start gap-2"><i class="ph ph-note-pencil text-gray-500 mt-1"></i><textarea class="card-notes-input card-details-input h-16" placeholder="Anotações..." onblur="window.saveKanbanState()">${cardData.notes || ''}</textarea></div>
+                </div>
+                <div class="mt-3 pt-3 border-t">
+                    <label class="text-xs font-medium text-gray-500">Valor do Negócio</label>
+                    <input type="text" class="card-value-input" value="${formatCurrency(cardData.value || 0)}" placeholder="R$ 0,00" oninput="window.formatInputCurrency(this); window.updateIndicators();" onblur="window.saveKanbanState()">
+                </div>
+                
+                <!-- Seletor de Temperatura -->
+                <div class="mt-3 pt-2 border-t flex items-center justify-between">
+                    <label class="text-xs font-medium text-gray-500">Temperatura</label>
+                    <div class="temp-selector">
+                        <button class="temp-btn temp-hot ${cardData.temperature === 'hot' ? 'active' : ''}" onclick="window.setCardTemperature('${cardData.id}', 'hot')">🔥</button>
+                        <button class="temp-btn temp-warm ${cardData.temperature === 'warm' ? 'active' : ''}" onclick="window.setCardTemperature('${cardData.id}', 'warm')">🟠</button>
+                        <button class="temp-btn temp-cold ${cardData.temperature === 'cold' ? 'active' : ''}" onclick="window.setCardTemperature('${cardData.id}', 'cold')">❄️</button>
+                    </div>
+                </div>
+                
+                <div class="mt-2 text-xs text-gray-400 flex justify-between">
+                    <span class="card-created-date">${timeAgo(cardData.createdAt, 'Criado')}</span>
+                    <span class="card-stage-time">${timeAgo(cardData.stageHistory && cardData.stageHistory.length > 0 ? cardData.stageHistory[cardData.stageHistory.length - 1].movedAt : '', 'Nesta fase')}</span>
+                </div>`;
+                
+            addCardEventListeners(card);
+            return card;
+        }
+
+        function setCardTemperature(cardId, temp) {
+            const card = document.getElementById(cardId);
+            if (!card) return;
+
+            card.classList.remove('temp-hot', 'temp-warm', 'temp-cold');
+            
+            if (card.dataset.temperature === temp) {
+                card.dataset.temperature = ''; // Deselect
+            } else {
+                card.dataset.temperature = temp;
+                card.classList.add(`temp-${temp}`);
+            }
+
+            const buttons = card.querySelectorAll('.temp-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            if (card.dataset.temperature) {
+                card.querySelector(`.temp-${card.dataset.temperature}`).classList.add('active');
+            }
+
+            saveKanbanState();
+        }
+
         function addCard() {
             const input = document.getElementById('newCardInput');
             const title = input.value.trim();
             if (!title) return;
 
             window.cardIdCounter++;
-            const newCard = document.createElement('div');
             const newCardId = `card-${window.cardIdCounter}`;
-            newCard.id = newCardId;
-            newCard.className = 'kanban-card';
-            newCard.draggable = true;
             const now = new Date().toISOString();
-            newCard.dataset.createdAt = now;
-            newCard.dataset.stageHistory = JSON.stringify([{ stage: 'prospect', movedAt: now }]);
+            
+            const cardData = {
+                id: newCardId,
+                title: title,
+                createdAt: now,
+                stageHistory: [{ stage: 'prospect', movedAt: now }],
+                temperature: 'cold', // Default temperature
+                company: '', contact: '', date: '', notes: '', value: 0
+            };
 
-            newCard.innerHTML = `
-                <button onclick="window.deleteCard('${newCardId}')" class="absolute top-2 right-2 text-gray-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-red-50 z-10"><i class="ph ph-trash"></i></button>
-                <input type="text" class="card-title-input font-semibold w-full bg-transparent" value="${title}" onblur="window.saveKanbanState()">
-                <div class="mt-2 space-y-2 text-sm">
-                    <div class="flex items-center gap-2"><i class="ph ph-buildings text-gray-500"></i><input type="text" class="card-company-input card-details-input" placeholder="Empresa" onblur="window.saveKanbanState()"></div>
-                    <div class="flex items-center gap-2"><i class="ph ph-user text-gray-500"></i><input type="text" class="card-contact-input card-details-input" placeholder="Contato" onblur="window.saveKanbanState()"></div>
-                    <div class="flex items-center gap-2"><i class="ph ph-calendar text-gray-500"></i><input type="text" class="card-date-input card-details-input" placeholder="Data (dd/mm/aa)" onblur="window.saveKanbanState()"></div>
-                    <div class="flex items-start gap-2"><i class="ph ph-note-pencil text-gray-500 mt-1"></i><textarea class="card-notes-input card-details-input h-16" placeholder="Anotações..." onblur="window.saveKanbanState()"></textarea></div>
-                </div>
-                <div class="mt-3 pt-3 border-t">
-                    <label class="text-xs font-medium text-gray-500">Valor do Negócio</label>
-                    <input type="text" class="card-value-input" value="R$ 0,00" oninput="window.formatInputCurrency(this); window.updateIndicators();" onblur="window.saveKanbanState()">
-                </div>
-                <div class="mt-2 text-xs text-gray-400 flex justify-between">
-                     <span class="card-created-date">Criado agora</span>
-                     <span class="card-stage-time">Nesta fase agora</span>
-                </div>
-            `;
-            addCardEventListeners(newCard);
+            const newCard = createCardElement(cardData);
             document.querySelector('.kanban-column[data-column="prospect"] .kanban-cards').appendChild(newCard);
+            
             input.value = '';
             updateIndicators();
             saveKanbanState();
@@ -1917,7 +2033,7 @@
             const taskId = `task-${Date.now()}`;
             const taskEl = document.createElement('div');
             taskEl.id = taskId;
-            taskEl.className = 'task-item flex items-center justify-between p-3 bg-gray-50 rounded-lg border';
+            taskEl.className = 'task-item flex items-center justify-between p-3 bg-white rounded-lg border shadow-sm';
             taskEl.innerHTML = `
                 <div class="flex items-center gap-3">
                     <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" onclick="window.toggleTaskCompletion('${taskId}')">
@@ -1926,13 +2042,22 @@
                 <button onclick="window.deleteTask('${taskId}')" class="text-gray-400 hover:text-red-600"><i class="ph-bold ph-trash"></i></button>
             `;
 
-            document.getElementById('taskListContainer').appendChild(taskEl);
+            const container = document.getElementById('taskListContainer');
+            // Remove a mensagem de "Tudo em dia!" se for a primeira tarefa
+            const emptyState = container.querySelector('.text-center');
+            if(emptyState) emptyState.remove();
+
+            container.appendChild(taskEl);
             input.value = '';
             saveTasksState();
         }
 
         function deleteTask(taskId) {
             document.getElementById(taskId)?.remove();
+            const container = document.getElementById('taskListContainer');
+            if (container.children.length === 0) {
+                loadTasksState({ tasks: [] }); // Recarrega para mostrar o estado vazio
+            }
             saveTasksState();
         }
 
@@ -2232,6 +2357,7 @@
             window.addManualWonDeal = addManualWonDeal;
             window.deleteWonDeal = deleteWonDeal;
             window.updateSummaryView = updateSummaryView;
+            window.setCardTemperature = setCardTemperature;
 
              // Lógica de autenticação
             document.getElementById('loginButton').addEventListener('click', handleLogin);
@@ -2383,3 +2509,4 @@
     </script>
 </body>
 </html>
+
