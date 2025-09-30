@@ -396,6 +396,16 @@
                         <!-- Coluna de Resultados -->
                         <div class="bg-white p-6 md:p-8 rounded-lg shadow-md lg:col-span-2">
                             <h2 class="text-2xl font-bold mb-1">Resultados</h2>
+
+                            <!-- NOVO CARD DE VALOR DE VENDA -->
+                            <div id="valorVendaCard" class="hidden mt-4">
+                                <div class="bg-blue-600 text-white p-6 rounded-lg shadow-lg text-center">
+                                    <p class="text-sm font-medium uppercase tracking-wider opacity-80">Preço de Venda Sugerido</p>
+                                    <p id="displayValorVenda" class="text-4xl md:text-5xl font-bold mt-2">R$ 0,00</p>
+                                </div>
+                            </div>
+                            <!-- FIM DO NOVO CARD -->
+
                             <div id="resultadoAnalise" class="result-box mt-6">
                                 <p class="text-gray-500 text-center py-10">Preencha os campos e calcule para ver os resultados.</p>
                             </div>
@@ -1217,9 +1227,12 @@
             const margemLucroInput = document.getElementById('margemLucro');
             const res = document.getElementById('resultadoAnalise');
             const simulador = document.getElementById('simuladorNegociacao');
+            const valorVendaCard = document.getElementById('valorVendaCard');
+
 
             res.innerHTML = '';
             simulador.classList.add('hidden');
+            valorVendaCard.classList.add('hidden');
             lastCalcState = {};
 
             if (custoTotalDireto <= 0) {
@@ -1265,6 +1278,9 @@
             const percDespesasTotais = (precoVendaFinal > 0) ? ((totalCustosDespesas - custoTotalDireto) / precoVendaFinal) * 100 : 0;
             const percLucro = (precoVendaFinal > 0) ? (lucroLiquidoFinal / precoVendaFinal) * 100 : 0;
             
+            valorVendaCard.classList.remove('hidden');
+            document.getElementById('displayValorVenda').textContent = formatCurrency(precoVendaFinal);
+
             res.innerHTML = `
                 <h3 class="font-bold text-lg mb-4">Análise da Venda</h3>
                 <div>
@@ -1507,16 +1523,34 @@
                 resDiv.innerHTML = `<p class="text-red-600 font-semibold text-center mt-2">O valor do sinal não pode ser maior que o preço de venda.</p>`;
                 return;
             }
-
-            const sinalCobreCustos = valorSinal >= totalCustosDespesas;
-
+            
             let sinalCardHtml = '';
             if (usarSinal) {
+                let statusClass = '', statusIcon = '', statusText = '';
+                const comparacaoValor = valorSinal - totalCustosDespesas;
+
+                if (comparacaoValor > 0) {
+                    statusClass = 'bg-emerald-50 border-emerald-200 text-emerald-800';
+                    statusIcon = '<i class="ph-bold ph-trend-up text-emerald-500 text-xl"></i>';
+                    statusText = `Sinal ${formatCurrency(comparacaoValor)} MAIOR que o custo!`;
+                } else if (comparacaoValor < 0) {
+                    statusClass = 'bg-red-50 border-red-200 text-red-800';
+                    statusIcon = '<i class="ph-bold ph-trend-down text-red-500 text-xl"></i>';
+                    statusText = `Sinal ${formatCurrency(Math.abs(comparacaoValor))} MENOR que o custo.`;
+                } else {
+                    statusClass = 'bg-amber-50 border-amber-200 text-amber-800';
+                    statusIcon = '<i class="ph-bold ph-equals text-amber-500 text-xl"></i>';
+                    statusText = 'Sinal IGUAL ao custo.';
+                }
+
                 sinalCardHtml = `
-                    <div class="indicator-card text-center col-span-2 ${sinalCobreCustos ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}">
-                        <p class="text-sm ${sinalCobreCustos ? 'text-emerald-800' : 'text-red-800'}">Valor do Sinal</p>
-                        <p class="text-xl font-bold ${sinalCobreCustos ? 'text-emerald-600' : 'text-red-600'}">${formatCurrency(valorSinal)}</p>
-                        ${!sinalCobreCustos ? '<p class="text-xs text-red-700 mt-1">Atenção: Sinal não cobre os custos!</p>' : ''}
+                    <div class="p-4 rounded-lg col-span-2 text-center ${statusClass}">
+                        <div class="flex items-center justify-center gap-2">
+                            ${statusIcon}
+                            <p class="text-sm font-semibold">Status do Sinal de Entrada</p>
+                        </div>
+                        <p class="text-2xl font-bold mt-1">${formatCurrency(valorSinal)}</p>
+                        <p class="text-sm font-semibold mt-1">${statusText}</p>
                     </div>
                 `;
             }
@@ -2057,4 +2091,3 @@
     </script>
 </body>
 </html>
-
