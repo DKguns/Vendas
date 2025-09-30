@@ -152,6 +152,24 @@
             text-decoration: line-through;
             color: #9ca3af;
         }
+        /* Estilos para o Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 1.5rem;
+        }
+        @media (min-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .dashboard-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border: 1px solid #e2e8f0;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -224,7 +242,8 @@
 
             <div class="mb-8 border-b border-gray-200">
                 <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
-                    <button onclick="window.changeTab(event, 'lucratividade')" class="tab-button active text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-calculator"></i>Calculadoras</button>
+                    <button onclick="window.changeTab(event, 'resumo')" class="tab-button active text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-house"></i>Resumo</button>
+                    <button onclick="window.changeTab(event, 'lucratividade')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-calculator"></i>Calculadoras</button>
                     <button onclick="window.changeTab(event, 'funil')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-funnel"></i>Funil de Vendas</button>
                     <button onclick="window.changeTab(event, 'vendas')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-chart-bar"></i>Vendas da Equipe</button>
                     <button onclick="window.changeTab(event, 'plano-acao')" class="tab-button text-sm md:text-base font-medium py-4 px-3 border-b-2 border-transparent"><i class="ph-bold ph-list-checks"></i>Plano de Ação</button>
@@ -234,8 +253,91 @@
             </div>
 
             <main>
+                <!-- Resumo / Dashboard -->
+                <div id="resumo" class="tab-content active">
+                    <div class="dashboard-grid">
+                        <!-- Card de Metas -->
+                        <div class="dashboard-card lg:col-span-1">
+                            <h3 class="font-bold text-xl mb-4">Progresso das Metas</h3>
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="font-semibold text-gray-700">Minha Meta</span>
+                                        <span id="summary-goalPercentage" class="text-sm font-medium text-blue-700">0%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3"><div id="summary-goalProgressBar" class="bg-blue-600 h-3 rounded-full" style="width: 0%"></div></div>
+                                    <p id="summary-goalRemaining" class="text-sm text-gray-500 text-right mt-1"></p>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="font-semibold text-gray-700">Meta da Equipe</span>
+                                        <span id="summary-teamGoalPercentage" class="text-sm font-medium text-green-700">0%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3"><div id="summary-teamGoalProgressBar" class="bg-green-600 h-3 rounded-full" style="width: 0%"></div></div>
+                                    <p id="summary-teamGoalRemaining" class="text-sm text-gray-500 text-right mt-1"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card de KPIs -->
+                         <div class="dashboard-card lg:col-span-2">
+                             <h3 class="font-bold text-xl mb-4">Indicadores Chave do Funil</h3>
+                             <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
+                                <div class="bg-blue-50 p-3 rounded-lg">
+                                    <p class="text-sm text-blue-800">Valor em Aberto</p>
+                                    <p id="summary-active-value" class="text-2xl font-bold text-blue-900">R$ 0,00</p>
+                                </div>
+                                <div class="bg-indigo-50 p-3 rounded-lg">
+                                    <p class="text-sm text-indigo-800">Forecast Ponderado</p>
+                                    <p id="summary-weighted-value" class="text-2xl font-bold text-indigo-900">R$ 0,00</p>
+                                </div>
+                                <div class="bg-emerald-50 p-3 rounded-lg">
+                                    <p class="text-sm text-emerald-800">Total Ganho</p>
+                                    <p id="summary-won-value" class="text-2xl font-bold text-emerald-900">R$ 0,00</p>
+                                </div>
+                                <div class="bg-amber-50 p-3 rounded-lg">
+                                    <p class="text-sm text-amber-800">Ticket Médio</p>
+                                    <p id="summary-average-ticket" class="text-2xl font-bold text-amber-900">R$ 0,00</p>
+                                </div>
+                                 <div class="bg-rose-50 p-3 rounded-lg">
+                                    <p class="text-sm text-rose-800">Taxa de Conversão</p>
+                                    <p id="summary-conversion-rate" class="text-2xl font-bold text-rose-900">0%</p>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-lg">
+                                    <p class="text-sm text-slate-800">Total Perdido</p>
+                                    <p id="summary-lost-value" class="text-2xl font-bold text-slate-900">R$ 0,00</p>
+                                </div>
+                             </div>
+                         </div>
+
+                        <!-- Card de Tarefas -->
+                        <div class="dashboard-card lg:col-span-1">
+                            <h3 class="font-bold text-xl mb-4">Próximas Tarefas</h3>
+                            <div id="summary-taskList" class="space-y-3 max-h-80 overflow-y-auto">
+                                <p class="text-gray-500 text-center py-4">Nenhuma tarefa pendente.</p>
+                            </div>
+                        </div>
+
+                        <!-- Card Visão do Funil -->
+                        <div class="dashboard-card lg:col-span-1">
+                             <h3 class="font-bold text-xl mb-4">Visão Geral do Funil</h3>
+                             <div id="summary-funnel-overview" class="space-y-3">
+                                <!-- Conteúdo gerado via JS -->
+                             </div>
+                        </div>
+
+                        <!-- Card Vendas da Equipe -->
+                        <div class="dashboard-card lg:col-span-1">
+                            <h3 class="font-bold text-xl mb-4">Últimas Vendas da Equipe</h3>
+                            <div id="summary-team-wins" class="space-y-3 max-h-80 overflow-y-auto">
+                                <p class="text-gray-500 text-center py-4">Nenhuma venda recente.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Calculadoras -->
-                <div id="lucratividade" class="tab-content active">
+                <div id="lucratividade" class="tab-content">
                     <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
                         <!-- Nova Calculadora Financeira -->
                         <div class="bg-white p-6 md:p-8 rounded-lg shadow-md lg:col-span-3">
@@ -922,6 +1024,8 @@
             updateTeamGoalProgress(0,0);
             // Limpa lista de vendas
             document.getElementById('wonDealsList').innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">Nenhuma venda ganha ainda.</td></tr>';
+            // Limpa o resumo
+            updateSummaryView();
         }
 
         // --- Funções de Lógica do Firebase (Firestore) ---
@@ -999,6 +1103,7 @@
                 window.cardIdCounter = maxId;
             }
             updateIndicators();
+            updateSummaryView();
         }
 
         async function saveNotesState() {
@@ -1111,6 +1216,7 @@
                     taskListContainer.appendChild(taskEl);
                 });
             }
+            updateSummaryView();
         }
         
         // --- Funções da Aplicação ---
@@ -1799,6 +1905,7 @@
                 document.getElementById('goalPercentage').textContent = `0%`;
                 document.getElementById('goalRemaining').textContent = 'Defina uma meta para acompanhar.';
             }
+            updateSummaryView();
         }
 
         // --- Funções do Plano de Ação (Tarefas) ---
@@ -1879,6 +1986,7 @@
                 percentageText.textContent = '0%';
                 remainingText.textContent = 'Defina uma meta para a equipe.';
             }
+            updateSummaryView();
         }
 
         function loadWonDeals(deals) {
@@ -1910,6 +2018,7 @@
             }
             const teamGoal = parseCurrency(document.getElementById('teamMetaInput').value);
             updateTeamGoalProgress(totalWonValue, teamGoal);
+            updateSummaryView(deals);
         }
 
         async function addWonDeal(card) {
@@ -2001,6 +2110,96 @@
                  console.error("Erro ao apagar venda:", error);
             }
         }
+        
+        // --- Funções do Resumo/Dashboard ---
+        function updateSummaryView(teamDeals = []) {
+             // 1. Atualizar KPIs
+            document.getElementById('summary-active-value').textContent = document.getElementById('active-value').textContent;
+            document.getElementById('summary-weighted-value').textContent = document.getElementById('weighted-value').textContent;
+            document.getElementById('summary-won-value').textContent = document.getElementById('won-value').textContent;
+            document.getElementById('summary-lost-value').textContent = document.getElementById('lost-value').textContent;
+            document.getElementById('summary-average-ticket').textContent = document.getElementById('average-ticket').textContent;
+            document.getElementById('summary-conversion-rate').textContent = document.getElementById('conversion-rate').textContent;
+            
+            // 2. Atualizar Metas
+            document.getElementById('summary-goalPercentage').textContent = document.getElementById('goalPercentage').textContent;
+            document.getElementById('summary-goalProgressBar').style.width = document.getElementById('goalProgressBar').style.width;
+            document.getElementById('summary-goalRemaining').textContent = document.getElementById('goalRemaining').textContent;
+            
+            document.getElementById('summary-teamGoalPercentage').textContent = document.getElementById('teamGoalPercentage').textContent;
+            document.getElementById('summary-teamGoalProgressBar').style.width = document.getElementById('teamGoalProgressBar').style.width;
+            document.getElementById('summary-teamGoalRemaining').textContent = document.getElementById('teamGoalRemaining').textContent;
+
+            // 3. Atualizar Tarefas
+            const taskListContainer = document.getElementById('summary-taskList');
+            taskListContainer.innerHTML = '';
+            const tasks = document.querySelectorAll('#taskListContainer .task-item:not(.completed)');
+            if(tasks.length > 0){
+                tasks.forEach((task, index) => {
+                    if (index < 5) { // Limitar a 5 tarefas
+                        const taskClone = task.cloneNode(true);
+                        // Remover botões e checkboxes para ser apenas leitura
+                        taskClone.querySelector('input[type="checkbox"]').remove();
+                        taskClone.querySelector('button')?.remove();
+                        taskClone.classList.remove('p-3');
+                        taskClone.classList.add('p-2');
+                        taskListContainer.appendChild(taskClone);
+                    }
+                });
+            } else {
+                taskListContainer.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhuma tarefa pendente.</p>';
+            }
+
+            // 4. Atualizar Visão do Funil
+            const funnelContainer = document.getElementById('summary-funnel-overview');
+            funnelContainer.innerHTML = '';
+            const stages = [
+                { id: 'prospect', name: 'Prospectando', icon: 'ph-binoculars', color: 'text-sky-500' },
+                { id: 'qualify', name: 'Qualificação', icon: 'ph-lightbulb', color: 'text-amber-500' },
+                { id: 'proposal', name: 'Proposta', icon: 'ph-file-text', color: 'text-indigo-500' },
+                { id: 'negotiate', name: 'Negociação', icon: 'ph-handshake', color: 'text-rose-500' }
+            ];
+            stages.forEach(stage => {
+                const column = document.querySelector(`.kanban-column[data-column="${stage.id}"]`);
+                const cards = column.querySelectorAll('.kanban-card');
+                let stageValue = 0;
+                cards.forEach(card => stageValue += parseCurrency(card.querySelector('.card-value-input').value));
+
+                const stageEl = document.createElement('div');
+                stageEl.className = 'flex justify-between items-center p-2 bg-gray-50 rounded-md';
+                stageEl.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="ph-fill ${stage.icon} ${stage.color}"></i>
+                        <span class="font-medium text-sm">${stage.name}</span>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-sm">${formatCurrency(stageValue)}</p>
+                        <p class="text-xs text-gray-500">${cards.length} neg.</p>
+                    </div>`;
+                funnelContainer.appendChild(stageEl);
+            });
+
+            // 5. Atualizar Vendas da Equipe
+            const teamWinsContainer = document.getElementById('summary-team-wins');
+            teamWinsContainer.innerHTML = '';
+            if(teamDeals.length > 0){
+                 teamDeals.slice(0, 5).forEach(deal => { // Limitar a 5 vendas
+                    const sellerName = (deal.sellerEmail && typeof deal.sellerEmail === 'string') ? deal.sellerEmail.split('@')[0] : 'Desconhecido';
+                    const dealEl = document.createElement('div');
+                    dealEl.className = 'p-2 bg-gray-50 rounded-md';
+                    dealEl.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <p class="font-semibold text-sm truncate">${deal.title}</p>
+                            <p class="font-bold text-sm text-emerald-600">${formatCurrency(deal.value)}</p>
+                        </div>
+                        <p class="text-xs text-gray-500">por ${sellerName}</p>
+                    `;
+                    teamWinsContainer.appendChild(dealEl);
+                 });
+            } else {
+                teamWinsContainer.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhuma venda recente.</p>';
+            }
+        }
 
 
         // --- Inicialização da Aplicação ---
@@ -2032,6 +2231,7 @@
             window.formatInputCurrency = formatInputCurrency;
             window.addManualWonDeal = addManualWonDeal;
             window.deleteWonDeal = deleteWonDeal;
+            window.updateSummaryView = updateSummaryView;
 
              // Lógica de autenticação
             document.getElementById('loginButton').addEventListener('click', handleLogin);
@@ -2183,4 +2383,3 @@
     </script>
 </body>
 </html>
-
