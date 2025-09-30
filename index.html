@@ -216,6 +216,7 @@
                         <p class="text-xs font-medium text-gray-500">Vendedor:</p>
                         <p id="userEmailDisplay" class="text-sm font-semibold text-blue-700"></p>
                         <div id="syncStatus" class="flex items-center justify-center md:justify-end text-xs mt-2"></div>
+                        <div id="connectionStatus" class="flex items-center justify-center md:justify-end text-xs mt-1"></div>
                         <button id="logoutButton" class="mt-2 text-xs text-red-600 hover:underline">Sair</button>
                     </div>
                 </div>
@@ -455,7 +456,7 @@
                                                 <div class="flex items-center gap-2 bg-white p-2 rounded-lg border">
                                                     <label for="sinalPercentual" class="text-sm whitespace-nowrap">Sinal de:</label>
                                                     <input type="number" id="sinalPercentual" class="w-20 px-2 py-1 border border-gray-300 rounded-md" value="30">
-                                                    <label for="sinalPercentual" class="text-sm">% do Custo Total</label>
+                                                    <label for="sinalPercentual" class="text-sm">% do Valor da Venda</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -576,6 +577,24 @@
                         <!-- Lista de Vendas Ganhas -->
                         <div>
                             <h2 class="text-3xl font-bold mb-2">Últimas Vendas Ganhas</h2>
+                            
+                            <!-- Adicionar Venda Manualmente -->
+                            <div class="bg-gray-50 p-4 rounded-lg border my-6">
+                                <h3 class="font-semibold text-lg mb-3">Adicionar Venda Manualmente</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                                    <div class="md:col-span-2">
+                                        <label for="manualDealName" class="text-sm font-medium">Nome do Negócio</label>
+                                        <input type="text" id="manualDealName" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Ex: Venda Cliente X">
+                                    </div>
+                                    <div>
+                                        <label for="manualDealValue" class="text-sm font-medium">Valor (R$)</label>
+                                        <input type="text" id="manualDealValue" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" oninput="window.formatInputCurrency(this)" placeholder="R$ 1.500,00">
+                                    </div>
+                                    <button onclick="window.addManualWonDeal()" class="bg-emerald-600 text-white font-bold py-2 px-4 rounded-md hover:bg-emerald-700 transition h-11 flex items-center justify-center gap-2"><i class="ph-bold ph-plus-circle"></i> Adicionar</button>
+                                </div>
+                                <div id="manualAddError" class="text-red-500 text-sm mt-2 text-center"></div>
+                            </div>
+
                              <div class="mt-4 overflow-x-auto">
                                 <table class="min-w-full bg-white border border-gray-200 rounded-lg">
                                     <thead class="bg-gray-50">
@@ -584,11 +603,12 @@
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendedor</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody id="wonDealsList" class="divide-y divide-gray-200">
                                         <!-- Linhas serão inseridas dinamicamente aqui -->
-                                        <tr><td colspan="4" class="p-6 text-center text-gray-500">Nenhuma venda ganha ainda.</td></tr>
+                                        <tr><td colspan="5" class="p-6 text-center text-gray-500">Nenhuma venda ganha ainda.</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -876,6 +896,16 @@
             }
         }
 
+        function updateConnectionStatus() {
+            const statusEl = document.getElementById('connectionStatus');
+            if (navigator.onLine) {
+                statusEl.innerHTML = `<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-green-500"></span> Online</span>`;
+            } else {
+                statusEl.innerHTML = `<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-400"></span> Offline</span>`;
+            }
+        }
+
+
         function resetUIState() {
             // Limpa o funil
             document.querySelectorAll('.kanban-cards').forEach(col => col.innerHTML = '');
@@ -891,7 +921,7 @@
             updateIndicators();
             updateTeamGoalProgress(0,0);
             // Limpa lista de vendas
-            document.getElementById('wonDealsList').innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-500">Nenhuma venda ganha ainda.</td></tr>';
+            document.getElementById('wonDealsList').innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">Nenhuma venda ganha ainda.</td></tr>';
         }
 
         // --- Funções de Lógica do Firebase (Firestore) ---
@@ -1098,6 +1128,8 @@
             document.getElementById('calcModoRoi').classList.add('hidden');
             document.getElementById('calcModoTco').classList.add('hidden');
             document.querySelectorAll('.calc-mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('valorVendaCard').classList.add('hidden');
+
 
             if (mode === 'lucratividade') {
                 document.getElementById('modoLucratividade').classList.remove('hidden');
@@ -1510,7 +1542,7 @@
             let valorSinal = 0;
             if (usarSinal) {
                 const sinalPercentual = parseFloat(document.getElementById('sinalPercentual').value) || 0;
-                valorSinal = totalCustosDespesas * (sinalPercentual / 100);
+                valorSinal = precoVendaFinal * (sinalPercentual / 100);
             }
             
             const valorAParcelar = precoVendaFinal - valorSinal;
@@ -1855,7 +1887,7 @@
             let totalWonValue = 0;
 
             if (deals.length === 0) {
-                listBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-500">Nenhuma venda ganha ainda.</td></tr>';
+                listBody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">Nenhuma venda ganha ainda.</td></tr>';
             } else {
                 deals.forEach(deal => {
                     const row = document.createElement('tr');
@@ -1866,6 +1898,11 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">${formatCurrency(deal.value)}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${sellerName}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dealDate.toLocaleDateString('pt-BR')}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                            <button onclick="window.deleteWonDeal('${deal.id}')" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50" title="Apagar Venda">
+                                <i class="ph-bold ph-trash"></i>
+                            </button>
+                        </td>
                     `;
                     listBody.appendChild(row);
                     totalWonValue += deal.value;
@@ -1887,7 +1924,7 @@
             };
             try {
                 const wonDealsCol = collection(db, `artifacts/${appId}/public/data/wonDeals`);
-                const q = query(wonDealsCol, where("cardId", "==", card.id));
+                const q = query(wonDealsCol, where("cardId", "==", card.id), where("sellerId", "==", userId));
                 const querySnapshot = await getDocs(q);
                 if (querySnapshot.empty) {
                     await addDoc(wonDealsCol, dealData);
@@ -1896,12 +1933,50 @@
                 console.error("Erro ao adicionar venda ganha:", error);
             }
         }
+        
+        async function addManualWonDeal() {
+            const nameInput = document.getElementById('manualDealName');
+            const valueInput = document.getElementById('manualDealValue');
+            const errorDiv = document.getElementById('manualAddError');
+            errorDiv.textContent = '';
+
+            const title = nameInput.value.trim();
+            const value = parseCurrency(valueInput.value);
+
+            if (!title || value <= 0) {
+                errorDiv.textContent = 'Por favor, preencha o nome e um valor válido para a venda.';
+                return;
+            }
+            if (!userId || !auth.currentUser) {
+                errorDiv.textContent = 'Você precisa estar logado para adicionar uma venda.';
+                return;
+            }
+
+            const dealData = {
+                cardId: `manual-${Date.now()}`, // ID único para vendas manuais
+                title: title,
+                value: value,
+                sellerId: userId,
+                sellerEmail: auth.currentUser.email || `anon-${userId.substring(0,6)}`,
+                wonAt: serverTimestamp()
+            };
+
+            try {
+                const wonDealsCol = collection(db, `artifacts/${appId}/public/data/wonDeals`);
+                await addDoc(wonDealsCol, dealData);
+                nameInput.value = '';
+                valueInput.value = '';
+            } catch (error) {
+                console.error("Erro ao adicionar venda manual:", error);
+                errorDiv.textContent = 'Ocorreu um erro ao salvar a venda.';
+            }
+        }
+
 
         async function removeWonDeal(cardId) {
             if (!userId) return;
             try {
                 const wonDealsCol = collection(db, `artifacts/${appId}/public/data/wonDeals`);
-                // Query mais segura: só busca por vendas ganhas que pertencem ao usuário atual
                 const q = query(wonDealsCol, where("cardId", "==", cardId), where("sellerId", "==", userId));
                 const querySnapshot = await getDocs(q);
                 
@@ -1914,6 +1989,16 @@
 
             } catch (error) {
                 console.error("Erro ao remover venda ganha. Verifique as regras de segurança do Firestore.", error);
+            }
+        }
+        
+        async function deleteWonDeal(dealId) {
+            if (!dealId) return;
+            try {
+                const dealDocRef = doc(db, `artifacts/${appId}/public/data/wonDeals`, dealId);
+                await deleteDoc(dealDocRef);
+            } catch (error) {
+                 console.error("Erro ao apagar venda:", error);
             }
         }
 
@@ -1945,6 +2030,8 @@
             window.deleteTask = deleteTask;
             window.toggleTaskCompletion = toggleTaskCompletion;
             window.formatInputCurrency = formatInputCurrency;
+            window.addManualWonDeal = addManualWonDeal;
+            window.deleteWonDeal = deleteWonDeal;
 
              // Lógica de autenticação
             document.getElementById('loginButton').addEventListener('click', handleLogin);
@@ -2026,6 +2113,11 @@
             usarSinalCheckbox.addEventListener('change', () => {
                 sinalInputsContainer.classList.toggle('hidden', !usarSinalCheckbox.checked);
             });
+            
+            // Lógica do Indicador de Conexão
+            window.addEventListener('online', updateConnectionStatus);
+            window.addEventListener('offline', updateConnectionStatus);
+            updateConnectionStatus();
 
 
             // Define o listener de autenticação
@@ -2071,12 +2163,12 @@
                     wonDealsUnsubscribe = onSnapshot(q, (querySnapshot) => {
                         const deals = [];
                         querySnapshot.forEach((doc) => {
-                            deals.push(doc.data());
+                            deals.push({ id: doc.id, ...doc.data() });
                         });
                         loadWonDeals(deals);
                     }, (error) => {
                         console.error("Erro ao carregar vendas ganhas:", error);
-                        document.getElementById('wonDealsList').innerHTML = '<tr><td colspan="4" class="p-6 text-center text-red-500">Erro ao carregar dados. Verifique as permissões do Firestore.</td></tr>';
+                        document.getElementById('wonDealsList').innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-500">Erro ao carregar dados. Verifique as permissões do Firestore.</td></tr>';
                     });
 
                 } else {
@@ -2091,3 +2183,4 @@
     </script>
 </body>
 </html>
+
